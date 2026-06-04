@@ -44,7 +44,10 @@ exemplo. Login de teste: **`mln` / `1234`**.
 
 ## Conectar o front ao backend
 
-- **Local:** crie um `.env` com `VITE_APPS_SCRIPT_URL=<sua URL /exec>`.
+- **Local:** crie um `.env` com:
+  ```
+  VITE_APPS_SCRIPT_URL=https://script.google.com/a/macros/berry.com.br/s/AKfycbwnvZKELX4v_a5dnh0W3ejBBUkWj7wNAMyEWz7G_7wqWH52rO2ccwj5E9UC1NGYYkUUaA/exec
+  ```
 - **Vercel:** em *Project Settings > Environment Variables*, adicione
   `VITE_APPS_SCRIPT_URL` com a mesma URL e refaça o deploy.
 
