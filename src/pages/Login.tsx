@@ -17,7 +17,6 @@ export function Login() {
     setCarregando(true);
     const resp = await entrar(usuario, senha);
     setCarregando(false);
-
     if (resp.ok) {
       if (resp.tipo === "master") {
         navigate("/admin");
