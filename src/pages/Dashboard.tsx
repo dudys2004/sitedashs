@@ -46,9 +46,9 @@ export function Dashboard() {
     aplicarTema(tema);
   }, [tema]);
 
-  if (!sessao) return null;
+  if (!sessao || !sessao.dashboard) return null;
   const { dashboard, cliente } = sessao;
-  const { kpis } = dashboard;
+  const { kpis } = dashboard!;
 
   function sairEVoltar() {
     sair();
@@ -99,18 +99,18 @@ export function Dashboard() {
         </section>
 
         <section>
-          <GraficoFluxoMensal dados={dashboard.porMes} />
+          <GraficoFluxoMensal dados={dashboard!.porMes} />
         </section>
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <GraficoDespesasClassificacao dados={dashboard.porClassificacao} />
-          <GraficoPorUnidade dados={dashboard.porUnidade} />
+          <GraficoDespesasClassificacao dados={dashboard!.porClassificacao} />
+          <GraficoPorUnidade dados={dashboard!.porUnidade} />
         </section>
 
         <p className="text-center text-xs" style={{ color: "var(--cor-texto-suave)" }}>
           Atualizado em{" "}
-          {new Date(dashboard.atualizadoEm).toLocaleString("pt-BR")} ·{" "}
-          {dashboard.unidades.join(" · ")}
+          {new Date(dashboard!.atualizadoEm).toLocaleString("pt-BR")} ·{" "}
+          {dashboard!.unidades.join(" · ")}
         </p>
       </main>
     </div>

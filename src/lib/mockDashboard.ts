@@ -27,6 +27,7 @@ const totalSaidas = porMes.reduce((s, m) => s + m.saidas, 0);
 
 export const MOCK_LOGIN_OK: RespostaLogin = {
   ok: true,
+  tipo: "usuario",
   cliente: { slug: "MLN", nome: "MLN" },
   dashboard: {
     moeda: "BRL",

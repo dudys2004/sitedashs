@@ -43,8 +43,11 @@ export interface ClienteSessao {
 
 export interface RespostaLoginOk {
   ok: true;
+  tipo: 'master' | 'usuario';
   cliente: ClienteSessao;
-  dashboard: Dashboard;
+  dashboard?: Dashboard;
+  paginas?: string[];
+  masterToken?: string;
 }
 
 export interface RespostaLoginErro {
@@ -53,3 +56,10 @@ export interface RespostaLoginErro {
 }
 
 export type RespostaLogin = RespostaLoginOk | RespostaLoginErro;
+
+export interface UsuarioAdmin {
+  login: string;
+  nome: string;
+  paginas: string;
+  ativo: boolean;
+}

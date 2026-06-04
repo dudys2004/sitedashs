@@ -10,8 +10,11 @@ import { login as apiLogin } from "../lib/api";
 import type { ClienteSessao, Dashboard, RespostaLogin } from "../lib/types";
 
 interface Sessao {
+  tipo: "master" | "usuario";
   cliente: ClienteSessao;
-  dashboard: Dashboard;
+  dashboard?: Dashboard;
+  paginas?: string[];
+  masterToken?: string;
 }
 
 interface AuthContextValor {
@@ -39,7 +42,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const entrar = useCallback(async (usuario: string, senha: string) => {
     const resp = await apiLogin(usuario, senha);
     if (resp.ok) {
-      const nova: Sessao = { cliente: resp.cliente, dashboard: resp.dashboard };
+      const nova: Sessao = {
+        tipo: resp.tipo,
+        cliente: resp.cliente,
+        dashboard: resp.dashboard,
+        paginas: resp.paginas,
+        masterToken: resp.masterToken,
+      };
       sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(nova));
       setSessao(nova);
     }

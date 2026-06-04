@@ -18,7 +18,11 @@ export function Login() {
     const resp = await entrar(usuario, senha);
     setCarregando(false);
     if (resp.ok) {
-      navigate(`/${resp.cliente.slug}`);
+      if (resp.tipo === "master") {
+        navigate("/admin");
+      } else {
+        navigate(`/${resp.cliente.slug}`);
+      }
     } else {
       setErro(mensagemErro(resp.erro));
     }

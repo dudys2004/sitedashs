@@ -1,24 +1,30 @@
 /**
  * Apps Script CENTRAL — Portal de Dashboards (Site-Dashs)
  * ------------------------------------------------------------------
- * Responsável por:
- *   1. Autenticar (login + senha com hash) contra a aba "usuarios" da
- *      planilha central (a planilha à qual este script está vinculado).
- *   2. Abrir a planilha de dados do cliente (openById) e montar o JSON
- *      do dashboard financeiro.
+ * Sistema completo com:
+ *   1. Master (Dudys / 312311) → acessa admin
+ *   2. Admin cria/edita/deleta usuários e define acesso a páginas
+ *   3. Usuários normais logam e veem seu(s) dashboard(s)
+ *   4. Aba "inicio" armazena tudo (master + usuários)
  *
- * Segurança: a senha NUNCA fica no front. O front envia login+senha; aqui
- * comparamos SHA-256(salt + senha) com o hash salvo. Sem credencial válida,
- * nenhum dado é devolvido.
+ * Endpoints:
+ *   - POST { acao: "login", login, senha } → { ok, cliente, dashboard } ou erro
+ *   - POST { acao: "admin_listar", masterToken } → { usuarios: [...] }
+ *   - POST { acao: "admin_criar", masterToken, login, senha, paginas } → { ok }
+ *   - POST { acao: "admin_deletar", masterToken, login } → { ok }
  *
  * Deploy: Implantar > Nova implantação > Tipo "App da Web"
  *   - Executar como: Eu
  *   - Quem tem acesso: Qualquer pessoa
- *   Copie a URL .../exec e coloque em VITE_APPS_SCRIPT_URL no front (Vercel).
  */
 
-// Nome da aba de usuários na planilha central.
-var ABA_USUARIOS = 'usuarios';
+var ABA_INICIO = 'inicio';
+
+// Hash pré-computado do master: SHA-256("salt-master" + "312311")
+var MASTER_LOGIN = 'dudys';
+var MASTER_HASH = 'd1ebfe2646b26f762d161e718809f8afea315c59cda2fb1f3613d1d62802bcb8';
+var MASTER_SALT = 'salt-master';
+var MASTER_TOKEN = 'master-token-12345';
 
 // ===================================================================
 // Entradas HTTP
@@ -27,17 +33,24 @@ var ABA_USUARIOS = 'usuarios';
 function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    if (body.acao === 'login') {
-      return responder(autenticarEMontar(body.login, body.senha));
+    switch (body.acao) {
+      case 'login':
+        return responder(autenticarEMontar(body.login, body.senha));
+      case 'admin_listar':
+        return responder(adminListarUsuarios(body.masterToken));
+      case 'admin_criar':
+        return responder(adminCriarUsuario(body.masterToken, body.login, body.senha, body.paginas));
+      case 'admin_deletar':
+        return responder(adminDeletarUsuario(body.masterToken, body.login));
+      default:
+        return responder({ ok: false, erro: 'acao_invalida' });
     }
-    return responder({ ok: false, erro: 'acao_invalida' });
   } catch (err) {
     return responder({ ok: false, erro: 'erro_servidor', detalhe: String(err) });
   }
 }
 
 function doGet() {
-  // Health-check simples (não devolve dados).
   return responder({ ok: true, servico: 'site-dashs', status: 'online' });
 }
 
@@ -54,7 +67,25 @@ function responder(obj) {
 function autenticarEMontar(login, senha) {
   if (!login || !senha) return { ok: false, erro: 'credenciais_invalidas' };
 
-  var usuario = buscarUsuario(String(login).trim().toLowerCase());
+  var loginNorm = String(login).trim().toLowerCase();
+
+  // Check master primeiro
+  if (loginNorm === MASTER_LOGIN) {
+    var hashCalc = gerarHash(senha, MASTER_SALT);
+    if (hashCalc === MASTER_HASH) {
+      return {
+        ok: true,
+        tipo: 'master',
+        masterToken: MASTER_TOKEN,
+        cliente: { slug: 'admin', nome: 'Administrador' },
+        dashboard: null,
+      };
+    }
+    return { ok: false, erro: 'credenciais_invalidas' };
+  }
+
+  // Check usuários normais
+  var usuario = buscarUsuario(loginNorm);
   if (!usuario) return { ok: false, erro: 'credenciais_invalidas' };
   if (!usuario.ativo) return { ok: false, erro: 'usuario_inativo' };
 
@@ -63,34 +94,140 @@ function autenticarEMontar(login, senha) {
     return { ok: false, erro: 'credenciais_invalidas' };
   }
 
-  var dashboard = montarDashboard(usuario.id_planilha);
+  // Se tem múltiplas páginas, pega o dashboard da primeira
+  var paginas = String(usuario.paginas || '').split(',').map(function (p) { return p.trim(); }).filter(Boolean);
+  var primeiraPagem = paginas[0];
+  var dashboard = primeiraPagem ? montarDashboard(usuario['id_planilha_' + primeiraPagem] || usuario.id_planilha) : null;
+
   return {
     ok: true,
-    cliente: { slug: usuario.slug, nome: usuario.nome || usuario.slug },
+    tipo: 'usuario',
+    cliente: { slug: primeiraPagem, nome: usuario.nome || primeiraPagem },
+    paginas: paginas,
     dashboard: dashboard,
   };
 }
 
 function buscarUsuario(login) {
-  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_USUARIOS);
-  if (!aba) throw new Error('Aba "' + ABA_USUARIOS + '" não encontrada na planilha central.');
+  garantirAbaInicio();
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_INICIO);
   var valores = aba.getDataRange().getValues();
+  if (valores.length < 2) return null;
+
   var cab = valores[0].map(normalizar);
   var iLogin = cab.indexOf('login');
+  if (iLogin < 0) return null;
+
   for (var r = 1; r < valores.length; r++) {
     if (String(valores[r][iLogin]).trim().toLowerCase() === login) {
       return {
         login: login,
         senha_hash: valores[r][cab.indexOf('senha_hash')],
         salt: valores[r][cab.indexOf('salt')],
-        slug: String(valores[r][cab.indexOf('slug')]).trim(),
-        id_planilha: String(valores[r][cab.indexOf('id_planilha')]).trim(),
+        paginas: String(valores[r][cab.indexOf('paginas')] || '').trim(),
         nome: valores[r][cab.indexOf('nome')],
+        id_planilha: String(valores[r][cab.indexOf('id_planilha')] || '').trim(),
         ativo: ehVerdadeiro(valores[r][cab.indexOf('ativo')]),
       };
     }
   }
   return null;
+}
+
+// ===================================================================
+// Admin
+// ===================================================================
+
+function adminListarUsuarios(masterToken) {
+  if (masterToken !== MASTER_TOKEN) {
+    return { ok: false, erro: 'nao_autorizado' };
+  }
+  garantirAbaInicio();
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_INICIO);
+  var valores = aba.getDataRange().getValues();
+  if (valores.length < 2) {
+    return { ok: true, usuarios: [] };
+  }
+
+  var cab = valores[0].map(normalizar);
+  var usuarios = [];
+  for (var r = 1; r < valores.length; r++) {
+    var login = String(valores[r][cab.indexOf('login')] || '').trim();
+    if (login && login !== MASTER_LOGIN) {
+      usuarios.push({
+        login: login,
+        nome: String(valores[r][cab.indexOf('nome')] || '').trim(),
+        paginas: String(valores[r][cab.indexOf('paginas')] || '').trim(),
+        ativo: ehVerdadeiro(valores[r][cab.indexOf('ativo')]),
+      });
+    }
+  }
+  return { ok: true, usuarios: usuarios };
+}
+
+function adminCriarUsuario(masterToken, login, senha, paginas) {
+  if (masterToken !== MASTER_TOKEN) {
+    return { ok: false, erro: 'nao_autorizado' };
+  }
+  if (!login || !senha || !paginas) {
+    return { ok: false, erro: 'campos_obrigatorios' };
+  }
+
+  garantirAbaInicio();
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_INICIO);
+  var valores = aba.getDataRange().getValues();
+  var cab = valores[0].map(normalizar);
+
+  // Check se login já existe
+  var loginNorm = String(login).trim().toLowerCase();
+  for (var r = 1; r < valores.length; r++) {
+    if (String(valores[r][cab.indexOf('login')]).trim().toLowerCase() === loginNorm) {
+      return { ok: false, erro: 'login_ja_existe' };
+    }
+  }
+
+  // Gera salt e hash
+  var salt = Utilities.getUuid().replace(/-/g, '');
+  var hash = gerarHash(senha, salt);
+
+  // Adiciona nova linha
+  var novaLinha = [];
+  for (var c = 0; c < valores[0].length; c++) {
+    var col = cab[c];
+    if (col === 'login') novaLinha[c] = login;
+    else if (col === 'senha_hash') novaLinha[c] = hash;
+    else if (col === 'salt') novaLinha[c] = salt;
+    else if (col === 'paginas') novaLinha[c] = String(paginas).trim();
+    else if (col === 'nome') novaLinha[c] = String(login).trim();
+    else if (col === 'ativo') novaLinha[c] = 'TRUE';
+    else novaLinha[c] = '';
+  }
+  aba.appendRow(novaLinha);
+
+  return { ok: true, mensagem: 'Usuario criado com sucesso' };
+}
+
+function adminDeletarUsuario(masterToken, login) {
+  if (masterToken !== MASTER_TOKEN) {
+    return { ok: false, erro: 'nao_autorizado' };
+  }
+  if (!login) {
+    return { ok: false, erro: 'login_obrigatorio' };
+  }
+
+  garantirAbaInicio();
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_INICIO);
+  var valores = aba.getDataRange().getValues();
+  var cab = valores[0].map(normalizar);
+  var loginNorm = String(login).trim().toLowerCase();
+
+  for (var r = 1; r < valores.length; r++) {
+    if (String(valores[r][cab.indexOf('login')]).trim().toLowerCase() === loginNorm) {
+      aba.deleteRow(r + 1); // +1 porque os índices de deleteRow começam em 1
+      return { ok: true, mensagem: 'Usuario deletado com sucesso' };
+    }
+  }
+  return { ok: false, erro: 'usuario_nao_encontrado' };
 }
 
 /** SHA-256(salt + senha) em hexadecimal minúsculo. */
@@ -104,6 +241,16 @@ function gerarHash(senha, salt) {
     var v = (b < 0 ? b + 256 : b).toString(16);
     return v.length === 1 ? '0' + v : v;
   }).join('');
+}
+
+function garantirAbaInicio() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = ss.getSheetByName(ABA_INICIO);
+  if (!aba) {
+    aba = ss.insertSheet(ABA_INICIO);
+    aba.appendRow(['login', 'senha_hash', 'salt', 'nome', 'paginas', 'id_planilha', 'ativo']);
+    aba.getRange(1, 1, 1, 7).setFontWeight('bold');
+  }
 }
 
 // ===================================================================
@@ -257,35 +404,4 @@ function ehVerdadeiro(v) {
 
 function arred(n) {
   return Math.round(n * 100) / 100;
-}
-
-// ===================================================================
-// FERRAMENTAS DE ADMINISTRAÇÃO (rodar manualmente no editor Apps Script)
-// ===================================================================
-
-/**
- * Gera hash+salt para cadastrar/trocar a senha de um usuário.
- * 1) Edite SENHA abaixo. 2) Rode esta função. 3) Veja o log (Ctrl+Enter).
- * 4) Cole 'salt' e 'senha_hash' na linha do usuário na aba "usuarios".
- */
-function ADMIN_gerarCredencial() {
-  var SENHA = 'troque-aqui';
-  var salt = Utilities.getUuid().replace(/-/g, '');
-  var hash = gerarHash(SENHA, salt);
-  Logger.log('salt:       ' + salt);
-  Logger.log('senha_hash: ' + hash);
-}
-
-/**
- * Cria a aba "usuarios" com cabeçalho, se ainda não existir.
- * Rode uma vez na planilha central.
- */
-function ADMIN_criarAbaUsuarios() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var aba = ss.getSheetByName(ABA_USUARIOS) || ss.insertSheet(ABA_USUARIOS);
-  if (aba.getLastRow() === 0) {
-    aba.appendRow(['login', 'senha_hash', 'salt', 'slug', 'id_planilha', 'nome', 'ativo']);
-    aba.getRange(1, 1, 1, 7).setFontWeight('bold');
-  }
-  Logger.log('Aba "usuarios" pronta.');
 }

@@ -1,22 +1,23 @@
-import type { RespostaLogin } from "./types";
+import type { RespostaLogin, UsuarioAdmin } from "./types";
 import { MOCK_LOGIN_OK } from "./mockDashboard";
 
-// URL do Web App do Apps Script central. Em produção, definir em
-// .env / variável de ambiente da Vercel: VITE_APPS_SCRIPT_URL=https://script.google.com/.../exec
 const URL_APPS_SCRIPT = import.meta.env.VITE_APPS_SCRIPT_URL as string | undefined;
 
-/**
- * Autentica no Apps Script central enviando login+senha.
- *
- * Observação CORS: enviamos como text/plain (sem headers customizados) para
- * evitar o preflight OPTIONS, que o Apps Script não responde. O Apps Script
- * faz JSON.parse(e.postData.contents).
- */
 export async function login(usuario: string, senha: string): Promise<RespostaLogin> {
-  // Modo mock (sem Apps Script publicado): permite desenvolver/testar a UI.
   if (!URL_APPS_SCRIPT) {
     await new Promise((r) => setTimeout(r, 450));
-    if (usuario.trim().toLowerCase() === "mln" && senha === "1234") {
+    const loginNorm = usuario.trim().toLowerCase();
+    // Master mock: dudys / 312311
+    if (loginNorm === "dudys" && senha === "312311") {
+      return {
+        ok: true,
+        tipo: "master",
+        cliente: { slug: "admin", nome: "Administrador" },
+        masterToken: "mock-master-token",
+      };
+    }
+    // Usuário normal mock: mln / 1234
+    if (loginNorm === "mln" && senha === "1234") {
       return MOCK_LOGIN_OK;
     }
     return { ok: false, erro: "credenciais_invalidas" };
@@ -31,6 +32,60 @@ export async function login(usuario: string, senha: string): Promise<RespostaLog
     });
     const data = (await resp.json()) as RespostaLogin;
     return data;
+  } catch {
+    return { ok: false, erro: "falha_conexao" };
+  }
+}
+
+export async function adminListarUsuarios(masterToken: string): Promise<{ ok: boolean; usuarios?: UsuarioAdmin[]; erro?: string }> {
+  if (!URL_APPS_SCRIPT) {
+    return { ok: true, usuarios: [] };
+  }
+
+  try {
+    const resp = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ acao: "admin_listar", masterToken }),
+      redirect: "follow",
+    });
+    return await resp.json();
+  } catch {
+    return { ok: false, erro: "falha_conexao" };
+  }
+}
+
+export async function adminCriarUsuario(masterToken: string, login: string, senha: string, paginas: string): Promise<{ ok: boolean; erro?: string; mensagem?: string }> {
+  if (!URL_APPS_SCRIPT) {
+    return { ok: true, mensagem: "Usuario criado (modo mock)" };
+  }
+
+  try {
+    const resp = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ acao: "admin_criar", masterToken, login, senha, paginas }),
+      redirect: "follow",
+    });
+    return await resp.json();
+  } catch {
+    return { ok: false, erro: "falha_conexao" };
+  }
+}
+
+export async function adminDeletarUsuario(masterToken: string, login: string): Promise<{ ok: boolean; erro?: string; mensagem?: string }> {
+  if (!URL_APPS_SCRIPT) {
+    return { ok: true, mensagem: "Usuario deletado (modo mock)" };
+  }
+
+  try {
+    const resp = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ acao: "admin_deletar", masterToken, login }),
+      redirect: "follow",
+    });
+    return await resp.json();
   } catch {
     return { ok: false, erro: "falha_conexao" };
   }
