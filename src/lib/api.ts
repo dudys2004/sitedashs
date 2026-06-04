@@ -55,7 +55,7 @@ export async function adminListarUsuarios(masterToken: string): Promise<{ ok: bo
   }
 }
 
-export async function adminCriarUsuario(masterToken: string, login: string, senha: string, paginas: string): Promise<{ ok: boolean; erro?: string; mensagem?: string }> {
+export async function adminCriarUsuario(masterToken: string, login: string, senha: string, paginas: string, nome?: string): Promise<{ ok: boolean; erro?: string; mensagem?: string }> {
   if (!URL_APPS_SCRIPT) {
     return { ok: true, mensagem: "Usuario criado (modo mock)" };
   }
@@ -64,7 +64,32 @@ export async function adminCriarUsuario(masterToken: string, login: string, senh
     const resp = await fetch(URL_APPS_SCRIPT, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ acao: "admin_criar", masterToken, login, senha, paginas }),
+      body: JSON.stringify({ acao: "admin_criar", masterToken, login, senha, paginas, nome }),
+      redirect: "follow",
+    });
+    return await resp.json();
+  } catch {
+    return { ok: false, erro: "falha_conexao" };
+  }
+}
+
+export async function adminEditarUsuario(
+  masterToken: string,
+  login: string,
+  novoLogin: string,
+  senha: string,
+  paginas: string,
+  nome: string
+): Promise<{ ok: boolean; erro?: string; mensagem?: string }> {
+  if (!URL_APPS_SCRIPT) {
+    return { ok: true, mensagem: "Usuario editado (modo mock)" };
+  }
+
+  try {
+    const resp = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ acao: "admin_editar", masterToken, login, novoLogin, senha, paginas, nome }),
       redirect: "follow",
     });
     return await resp.json();
@@ -83,6 +108,24 @@ export async function adminDeletarUsuario(masterToken: string, login: string): P
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ acao: "admin_deletar", masterToken, login }),
+      redirect: "follow",
+    });
+    return await resp.json();
+  } catch {
+    return { ok: false, erro: "falha_conexao" };
+  }
+}
+
+export async function adminListarPaginas(): Promise<{ ok: boolean; paginas?: Array<{ slug: string; nome: string; url: string }>; erro?: string }> {
+  if (!URL_APPS_SCRIPT) {
+    return { ok: true, paginas: [{ slug: "MLN", nome: "MLN", url: "/MLN" }] };
+  }
+
+  try {
+    const resp = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ acao: "admin_listar_paginas" }),
       redirect: "follow",
     });
     return await resp.json();

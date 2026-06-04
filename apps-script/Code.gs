@@ -11,7 +11,9 @@
  *   - POST { acao: "login", login, senha } → { ok, cliente, dashboard } ou erro
  *   - POST { acao: "admin_listar", masterToken } → { usuarios: [...] }
  *   - POST { acao: "admin_criar", masterToken, login, senha, paginas } → { ok }
+ *   - POST { acao: "admin_editar", masterToken, login, novoLogin, senha, paginas, nome } → { ok }
  *   - POST { acao: "admin_deletar", masterToken, login } → { ok }
+ *   - POST { acao: "admin_listar_paginas" } → { paginas: [...] }
  *
  * Deploy: Implantar > Nova implantação > Tipo "App da Web"
  *   - Executar como: Eu
@@ -39,9 +41,13 @@ function doPost(e) {
       case 'admin_listar':
         return responder(adminListarUsuarios(body.masterToken));
       case 'admin_criar':
-        return responder(adminCriarUsuario(body.masterToken, body.login, body.senha, body.paginas));
+        return responder(adminCriarUsuario(body.masterToken, body.login, body.senha, body.paginas, body.nome));
+      case 'admin_editar':
+        return responder(adminEditarUsuario(body.masterToken, body.login, body.novoLogin, body.senha, body.paginas, body.nome));
       case 'admin_deletar':
         return responder(adminDeletarUsuario(body.masterToken, body.login));
+      case 'admin_listar_paginas':
+        return responder(adminListarPaginas());
       default:
         return responder({ ok: false, erro: 'acao_invalida' });
     }
@@ -165,7 +171,7 @@ function adminListarUsuarios(masterToken) {
   return { ok: true, usuarios: usuarios };
 }
 
-function adminCriarUsuario(masterToken, login, senha, paginas) {
+function adminCriarUsuario(masterToken, login, senha, paginas, nome) {
   if (masterToken !== MASTER_TOKEN) {
     return { ok: false, erro: 'nao_autorizado' };
   }
@@ -198,13 +204,77 @@ function adminCriarUsuario(masterToken, login, senha, paginas) {
     else if (col === 'senha_hash') novaLinha[c] = hash;
     else if (col === 'salt') novaLinha[c] = salt;
     else if (col === 'paginas') novaLinha[c] = String(paginas).trim();
-    else if (col === 'nome') novaLinha[c] = String(login).trim();
+    else if (col === 'nome') novaLinha[c] = String(nome || login).trim();
     else if (col === 'ativo') novaLinha[c] = 'TRUE';
     else novaLinha[c] = '';
   }
   aba.appendRow(novaLinha);
 
   return { ok: true, mensagem: 'Usuario criado com sucesso' };
+}
+
+function adminEditarUsuario(masterToken, login, novoLogin, senha, paginas, nome) {
+  if (masterToken !== MASTER_TOKEN) {
+    return { ok: false, erro: 'nao_autorizado' };
+  }
+  if (!login) {
+    return { ok: false, erro: 'login_obrigatorio' };
+  }
+
+  garantirAbaInicio();
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_INICIO);
+  var valores = aba.getDataRange().getValues();
+  var cab = valores[0].map(normalizar);
+  var loginNorm = String(login).trim().toLowerCase();
+
+  // Procura usuário por login original
+  for (var r = 1; r < valores.length; r++) {
+    if (String(valores[r][cab.indexOf('login')]).trim().toLowerCase() === loginNorm) {
+      // Se mudou o login, verifica se novo login já existe
+      if (novoLogin && novoLogin !== login) {
+        var novoLoginNorm = String(novoLogin).trim().toLowerCase();
+        for (var c = 1; c < valores.length; c++) {
+          if (c !== r && String(valores[c][cab.indexOf('login')]).trim().toLowerCase() === novoLoginNorm) {
+            return { ok: false, erro: 'login_ja_existe' };
+          }
+        }
+        valores[r][cab.indexOf('login')] = novoLogin;
+      }
+
+      // Atualiza senha se fornecida
+      if (senha) {
+        var salt = String(valores[r][cab.indexOf('salt')] || '').trim();
+        if (!salt) salt = Utilities.getUuid().replace(/-/g, '');
+        var hash = gerarHash(senha, salt);
+        valores[r][cab.indexOf('salt')] = salt;
+        valores[r][cab.indexOf('senha_hash')] = hash;
+      }
+
+      // Atualiza paginas se fornecido
+      if (paginas) {
+        valores[r][cab.indexOf('paginas')] = String(paginas).trim();
+      }
+
+      // Atualiza nome se fornecido
+      if (nome) {
+        valores[r][cab.indexOf('nome')] = String(nome).trim();
+      }
+
+      aba.clearContents();
+      aba.getRange(1, 1, valores.length, valores[0].length).setValues(valores);
+      return { ok: true, mensagem: 'Usuario atualizado com sucesso' };
+    }
+  }
+  return { ok: false, erro: 'usuario_nao_encontrado' };
+}
+
+function adminListarPaginas() {
+  // Lista todas as páginas/clientes disponíveis (para links de acesso)
+  // Retorna um array com info de cada página
+  var paginas = [
+    { slug: 'MLN', nome: 'MLN', url: '/MLN' }
+  ];
+  return { ok: true, paginas: paginas };
 }
 
 function adminDeletarUsuario(masterToken, login) {
