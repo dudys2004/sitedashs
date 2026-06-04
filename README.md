@@ -46,7 +46,7 @@ exemplo. Login de teste: **`mln` / `1234`**.
 
 - **Local:** crie um `.env` com:
   ```
-  VITE_APPS_SCRIPT_URL=https://script.google.com/a/macros/berry.com.br/s/AKfycbwnvZKELX4v_a5dnh0W3ejBBUkWj7wNAMyEWz7G_7wqWH52rO2ccwj5E9UC1NGYYkUUaA/exec
+  VITE_APPS_SCRIPT_URL=https://script.google.com/macros/s/AKfycbzczFvDRouUsRa1pQstyUEYgo5hPzGW7kneT4ZpeU_YhJWB5x8Nkc9TylKdMggwMidH/exec
   ```
 - **Vercel:** em *Project Settings > Environment Variables*, adicione
   `VITE_APPS_SCRIPT_URL` com a mesma URL e refaça o deploy.
