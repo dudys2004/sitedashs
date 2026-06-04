@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { HostnameRedirector } from "./components/HostnameRedirector";
 import { RotaProtegida } from "./components/RotaProtegida";
 import { RotaAdminProtegida } from "./components/RotaAdminProtegida";
 import { Login } from "./pages/Login";
@@ -14,27 +15,29 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route
-            path="/admin"
-            element={
-              <RotaAdminProtegida>
-                <AdminPanel />
-              </RotaAdminProtegida>
-            }
-          />
-          <Route
-            path="/:slug"
-            element={
-              <RotaProtegida>
-                <Dashboard />
-              </RotaProtegida>
-            }
-          />
-          <Route path="/404" element={<NaoEncontrado />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
+        <HostnameRedirector>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route
+              path="/admin"
+              element={
+                <RotaAdminProtegida>
+                  <AdminPanel />
+                </RotaAdminProtegida>
+              }
+            />
+            <Route
+              path="/:slug"
+              element={
+                <RotaProtegida>
+                  <Dashboard />
+                </RotaProtegida>
+              }
+            />
+            <Route path="/404" element={<NaoEncontrado />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </HostnameRedirector>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
