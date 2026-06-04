@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  /* Variáveis de tema sobrescritas por cliente em runtime (ver styles/tema.ts) */
+  --cor-primaria: #2563eb;
+  --cor-fundo: #0f172a;
+  --cor-superficie: #1e293b;
+  --cor-texto: #e2e8f0;
+  --cor-texto-suave: #94a3b8;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+}
