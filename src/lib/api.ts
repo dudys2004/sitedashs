@@ -1,25 +1,46 @@
 import type { RespostaLogin, UsuarioAdmin } from "./types";
-import { MOCK_LOGIN_OK } from "./mockDashboard";
 
-const URL_APPS_SCRIPT = import.meta.env.VITE_APPS_SCRIPT_URL as string | undefined;
+// FORÇAR MOCK (vazio para ativar)
+const URL_APPS_SCRIPT = "";
 
 export async function login(usuario: string, senha: string): Promise<RespostaLogin> {
+  // Se URL_APPS_SCRIPT vazio, usa mock
   if (!URL_APPS_SCRIPT) {
     await new Promise((r) => setTimeout(r, 450));
+
     const loginNorm = usuario.trim().toLowerCase();
-    // Master mock: dudys / 312311
-    if (loginNorm === "dudys" && senha === "312311") {
+
+    // Mock simples - qualquer login com senha "1234" funciona
+    if (senha === "1234") {
       return {
         ok: true,
-        tipo: "master",
-        cliente: { slug: "admin", nome: "Administrador" },
-        masterToken: "mock-master-token",
+        tipo: "usuario",
+        cliente: { slug: "MLN", nome: loginNorm.toUpperCase() },
+        paginas: ["MLN"],
+        dashboard: {
+          moeda: "BRL",
+          atualizadoEm: new Date().toISOString(),
+          unidades: ["Teste"],
+          kpis: {
+            totalEntradas: 50000,
+            totalSaidas: 30000,
+            saldo: 20000,
+            qtdLancamentos: 150,
+          },
+          porMes: [
+            { mes: "2025-01", label: "jan/25", entradas: 5000, saidas: 3000, saldo: 2000 },
+            { mes: "2025-02", label: "fev/25", entradas: 5500, saidas: 3200, saldo: 2300 },
+          ],
+          porClassificacao: [
+            { classificacao: "Teste", saidas: 30000 },
+          ],
+          porUnidade: [
+            { unidade: "Teste", entradas: 50000, saidas: 30000 },
+          ],
+        },
       };
     }
-    // Usuário normal mock: mln / 1234
-    if (loginNorm === "mln" && senha === "1234") {
-      return MOCK_LOGIN_OK;
-    }
+
     return { ok: false, erro: "credenciais_invalidas" };
   }
 
