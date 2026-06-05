@@ -203,31 +203,11 @@ export function DashboardMLN() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: BG }}>
 
-      {/* Seta discreta lateral → MLN_2 */}
-      <a
-        href="/mln-2"
-        title="Acompanhamento de Produção"
-        style={{
-          position: "fixed", right: 0, top: "50%", transform: "translateY(-50%)",
-          backgroundColor: VERDE, color: "#ffffff",
-          width: 22, padding: "22px 0",
-          borderRadius: "6px 0 0 6px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 50, textDecoration: "none",
-          opacity: 0.45, fontSize: 18, lineHeight: 1,
-          boxShadow: "-2px 2px 10px rgba(0,0,0,0.18)",
-          transition: "opacity 0.2s, width 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "34px"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
-      >
-        ›
-      </a>
-
       {/* Header com textura de mármore */}
       <header
         className="sticky top-0 z-10 border-b"
         style={{
+          position: "relative",
           borderColor: "#c8bfb0",
           backgroundImage: `
             repeating-linear-gradient(-62deg, transparent 0px, transparent 7px, rgba(160,160,160,0.07) 7px, rgba(160,160,160,0.07) 8px),
@@ -272,6 +252,26 @@ export function DashboardMLN() {
             />
           </div>
         </div>
+
+        {/* Seta discreta → Acompanhamento de Produção */}
+        <a
+          href="/mln-2"
+          title="Acompanhamento de Produção"
+          style={{
+            position: "absolute", right: 0, top: 0, bottom: 0, width: 22,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            backgroundColor: VERDE, color: "#ffffff",
+            borderRadius: "6px 0 0 6px",
+            textDecoration: "none", fontSize: 20, lineHeight: 1,
+            opacity: 0.45, zIndex: 10,
+            boxShadow: "-2px 0 10px rgba(0,0,0,0.15)",
+            transition: "opacity 0.2s, width 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "34px"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
+        >
+          ›
+        </a>
       </header>
 
       {/* Corpo principal: 2 colunas */}

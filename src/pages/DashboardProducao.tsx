@@ -238,6 +238,7 @@ export function DashboardProducao() {
       <header
         className="sticky top-0 z-10 border-b"
         style={{
+          position: "relative",
           borderColor:"#c8bfb0",
           backgroundImage:`
             repeating-linear-gradient(-62deg, transparent 0px, transparent 7px, rgba(160,160,160,0.07) 7px, rgba(160,160,160,0.07) 8px),
@@ -266,19 +267,27 @@ export function DashboardProducao() {
             Marmoaria Leão do Norte
           </h1>
 
-          {/* Botão Financeiro */}
-          <div className="ml-auto">
-            <a
-              href="/mln"
-              className="px-5 py-2.5 rounded-lg font-medium text-sm"
-              style={{ backgroundColor:"#f0f0f0", color:VERDE }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor="#e5e5e5")}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor="#f0f0f0")}
-            >
-              ← Financeiro
-            </a>
-          </div>
         </div>
+
+        {/* Seta discreta ← Financeiro */}
+        <a
+          href="/mln"
+          title="Financeiro"
+          style={{
+            position: "absolute", left: 0, top: 0, bottom: 0, width: 22,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            backgroundColor: VERDE, color: "#ffffff",
+            borderRadius: "0 6px 6px 0",
+            textDecoration: "none", fontSize: 20, lineHeight: 1,
+            opacity: 0.45, zIndex: 10,
+            boxShadow: "2px 0 10px rgba(0,0,0,0.15)",
+            transition: "opacity 0.2s, width 0.2s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "34px"; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
+        >
+          ‹
+        </a>
       </header>
 
       {/* ── Corpo ── */}
