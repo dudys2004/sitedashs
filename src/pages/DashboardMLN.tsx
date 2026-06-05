@@ -253,10 +253,10 @@ export function DashboardMLN() {
           </div>
         </div>
 
-        {/* Seta discreta → Acompanhamento de Produção */}
+        {/* Seta discreta → MLN-2 */}
         <a
           href="/mln-2"
-          title="Acompanhamento de Produção"
+          title="MLN-2"
           style={{
             position: "absolute", right: 0, top: 0, bottom: 0, width: 22,
             display: "flex", alignItems: "center", justifyContent: "center",

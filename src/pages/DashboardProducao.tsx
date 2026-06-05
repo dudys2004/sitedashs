@@ -269,10 +269,10 @@ export function DashboardProducao() {
 
         </div>
 
-        {/* Seta discreta ← Financeiro */}
+        {/* Seta discreta ← MLN */}
         <a
           href="/mln"
-          title="Financeiro"
+          title="MLN"
           style={{
             position: "absolute", left: 0, top: 0, bottom: 0, width: 22,
             display: "flex", alignItems: "center", justifyContent: "center",
