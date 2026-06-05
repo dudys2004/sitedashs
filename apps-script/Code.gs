@@ -216,8 +216,8 @@ function adminListarPaginas() {
   return {
     ok: true,
     paginas: [
-      { slug: 'MLN',   nome: 'Financeiro',                  url: '/mln'   },
-      { slug: 'MLN-2', nome: 'Acompanhamento de Produção',  url: '/mln-2' },
+      { slug: 'MLN',   nome: 'MLN',   url: '/mln'   },
+      { slug: 'MLN-2', nome: 'MLN_2', url: '/mln-2' },
     ]
   };
 }

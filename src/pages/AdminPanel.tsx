@@ -210,21 +210,6 @@ export function AdminPanel() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Links rápidos para as páginas */}
-            {paginas.map(p => (
-              <a key={p.slug} href={p.url} target="_blank" rel="noopener noreferrer"
-                style={{
-                  padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500,
-                  border: `1px solid ${BORD}`, color: MUTED, textDecoration: "none",
-                  transition: "all 0.15s",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = "#a5b4fc"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = BORD; e.currentTarget.style.color = MUTED; }}
-              >
-                {p.nome} ↗
-              </a>
-            ))}
-
             <button
               onClick={sairEVoltar}
               style={{
@@ -254,6 +239,47 @@ export function AdminPanel() {
             {msg.tipo === "ok" ? "✓ " : "⚠ "}{msg.texto}
           </div>
         )}
+
+        {/* ── Páginas disponíveis ── */}
+        <section style={{ backgroundColor: CARD, borderRadius: 16, padding: 24, border: `1px solid ${BORD}` }}>
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, color: TEXT }}>Páginas</h2>
+          <p style={{ fontSize: 12, color: MUTED, marginBottom: 20 }}>
+            Acesse as páginas disponíveis no sistema
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
+            {paginas.length === 0 && (
+              <p style={{ color: MUTED, fontSize: 13 }}>Carregando páginas...</p>
+            )}
+            {paginas.map(p => (
+              <a
+                key={p.slug}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "16px 18px", borderRadius: 10,
+                  border: `1px solid ${BORD}`, textDecoration: "none",
+                  backgroundColor: "transparent", transition: "all 0.15s",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = ACCENT;
+                  e.currentTarget.style.backgroundColor = `${ACCENT}0f`;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = BORD;
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>{p.nome}</p>
+                  <p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>{p.url}</p>
+                </div>
+                <span style={{ color: MUTED, fontSize: 16, marginLeft: 8 }}>↗</span>
+              </a>
+            ))}
+          </div>
+        </section>
 
         {/* ── Formulário criar / editar ── */}
         <section style={{ backgroundColor: CARD, borderRadius: 16, padding: 24, border: `1px solid ${BORD}` }}>
