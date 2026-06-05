@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { RotaProtegida } from "./components/RotaProtegida";
 import { RotaAdminProtegida } from "./components/RotaAdminProtegida";
 import { Login } from "./pages/Login";
 import { AdminPanel } from "./pages/AdminPanel";
@@ -20,9 +21,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Públicas — sem restrição de acesso */}
-          <Route path="/mln"   element={<DashboardMLN />} />
-          <Route path="/mln-2" element={<DashboardProducao />} />
+          {/* Protegidas por login */}
+          <Route path="/mln"   element={<RotaProtegida slug="MLN">  <DashboardMLN />   </RotaProtegida>} />
+          <Route path="/mln-2" element={<RotaProtegida slug="MLN-2"><DashboardProducao /></RotaProtegida>} />
 
           {/* Login e Admin */}
           <Route path="/login" element={<Login />} />

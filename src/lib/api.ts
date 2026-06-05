@@ -61,9 +61,14 @@ export async function adminDeletarUsuario(token: string, login: string): Promise
   catch { return { ok: false, erro: "falha_conexao" }; }
 }
 
-export async function adminListarPaginas(): Promise<{ ok: boolean; paginas?: PaginaDisponivel[]; erro?: string }> {
-  try { return await post({ acao: "admin_listar_paginas" }); }
-  catch { return { ok: false, erro: "falha_conexao" }; }
+// Páginas disponíveis — definidas no frontend (fonte da verdade)
+export const PAGINAS_DISPONIVEIS: PaginaDisponivel[] = [
+  { slug: "MLN",   nome: "MLN",   url: "/mln"   },
+  { slug: "MLN-2", nome: "MLN-2", url: "/mln-2" },
+];
+
+export async function adminListarPaginas(): Promise<{ ok: boolean; paginas?: PaginaDisponivel[] }> {
+  return { ok: true, paginas: PAGINAS_DISPONIVEIS };
 }
 
 // ── Util ─────────────────────────────────────────────────────────────
