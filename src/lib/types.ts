@@ -1,65 +1,68 @@
-// Tipos compartilhados entre front e o formato JSON devolvido pelo Apps Script.
-
-export interface PontoMes {
-  mes: string; // "2025-08"
-  label: string; // "ago/25"
-  entradas: number;
-  saidas: number;
-  saldo: number;
+export interface KPIsDRE {
+  faturamentoBruto: number;
+  despesasVariaveisDiretas: number;
+  lucroBruto: number;
+  outasDespesasVariaveis: number;
+  margemDeContribuicao: number;
+  ebitda: number;
+  resultadoLiquido: number;
+  saldoFinal: number;
+  despesasVariaveisDiretasPerc: number;
+  lucroBrutoPerc: number;
+  outasDespesasVariaveisPerc: number;
+  margemDeContribuicaoPerc: number;
+  ebitdaPerc: number;
+  resultadoLiquidoPerc: number;
+  saldoFinalPerc: number;
 }
 
-export interface PontoClassificacao {
-  classificacao: string;
-  saidas: number;
-}
-
-export interface PontoUnidade {
+export interface DREPorMes {
+  mes: string;
+  label: string;
   unidade: string;
-  entradas: number;
-  saidas: number;
+  faturamentoBruto: number;
+  despesasVariaveisDiretas: number;
+  lucroBruto: number;
+  outasDespesasVariaveis: number;
+  margemDeContribuicao: number;
+  ebitda: number;
+  resultadoLiquido: number;
+  saldoFinal: number;
 }
 
-export interface Kpis {
-  totalEntradas: number;
-  totalSaidas: number;
-  saldo: number;
-  qtdLancamentos: number;
-}
+export type Categoria = { categoria: string; valor: number; percentual: number };
 
-export interface Dashboard {
+export interface DREData {
   moeda: string;
   atualizadoEm: string;
+  // Competência
   unidades: string[];
-  kpis: Kpis;
-  porMes: PontoMes[];
-  porClassificacao: PontoClassificacao[];
-  porUnidade: PontoUnidade[];
+  mesesDisponiveis: string[];
+  kpis: KPIsDRE;
+  porMes: DREPorMes[];
+  receitaPorCategoria: Categoria[];
+  despesasPorCategoria: Categoria[];
+  rawMeses: DREPorMes[];
+  // Caixa
+  unidadesCaixa: string[];
+  mesesDisponiveisCaixa: string[];
+  porMesCaixa: DREPorMes[];
+  rawMesesCaixa: DREPorMes[];
+  receitaPorCategoriaCaixa: Categoria[];
+  despesasPorCategoriaCaixa: Categoria[];
 }
 
-export interface ClienteSessao {
-  slug: string;
-  nome: string;
+export interface ProducaoItem {
+  cliente: string;
+  ambiente: string;
+  statusMarcos: number;
+  statusMarcosLabel: string;
+  previsaoEntrega: string;
+  observacao: string;
+  dataAtualizacao?: string;
 }
 
-export interface RespostaLoginOk {
-  ok: true;
-  tipo: 'master' | 'usuario';
-  cliente: ClienteSessao;
-  dashboard?: Dashboard;
-  paginas?: string[];
-  masterToken?: string;
-}
-
-export interface RespostaLoginErro {
-  ok: false;
-  erro: string;
-}
-
-export type RespostaLogin = RespostaLoginOk | RespostaLoginErro;
-
-export interface UsuarioAdmin {
-  login: string;
-  nome: string;
-  paginas: string;
-  ativo: boolean;
+export interface ProducaoData {
+  atualizadoEm: string;
+  clientes: ProducaoItem[];
 }
