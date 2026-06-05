@@ -72,3 +72,37 @@ export interface ProducaoData {
   atualizadoEm: string;
   clientes: ProducaoItem[];
 }
+
+// ── Auth ──────────────────────────────────────────────────────────
+export interface ClienteSessao {
+  slug: string;
+  nome: string;
+}
+
+export interface RespostaLoginOk {
+  ok: true;
+  tipo: "master" | "usuario";
+  cliente: ClienteSessao;
+  paginas?: string[];
+  masterToken?: string;
+}
+
+export interface RespostaLoginErro {
+  ok: false;
+  erro: string;
+}
+
+export type RespostaLogin = RespostaLoginOk | RespostaLoginErro;
+
+export interface UsuarioAdmin {
+  login: string;
+  nome: string;
+  paginas: string;
+  ativo: boolean;
+}
+
+export interface PaginaDisponivel {
+  slug: string;
+  nome: string;
+  url: string;
+}

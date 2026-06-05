@@ -1,22 +1,47 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { RotaAdminProtegida } from "./components/RotaAdminProtegida";
+import { Login } from "./pages/Login";
+import { AdminPanel } from "./pages/AdminPanel";
 import { DashboardMLN } from "./pages/DashboardMLN";
 import { DashboardProducao } from "./pages/DashboardProducao";
+import { NaoEncontrado } from "./pages/NaoEncontrado";
 import "./index.css";
 
-// Detecta subdomínio mln.nortemconsultoria.com.br → exibe MLN_2
-const isMlnSubdomain = typeof window !== "undefined" &&
+// Subdomínio mln.nortemconsultoria.com.br → MLN_2
+const isMlnSubdomain =
+  typeof window !== "undefined" &&
   window.location.hostname === "mln.nortemconsultoria.com.br";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/mln"   element={<DashboardMLN />} />
-        <Route path="/mln-2" element={<DashboardProducao />} />
-        <Route path="*" element={<Navigate to={isMlnSubdomain ? "/mln-2" : "/mln"} replace />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          {/* Públicas — sem restrição de acesso */}
+          <Route path="/mln"   element={<DashboardMLN />} />
+          <Route path="/mln-2" element={<DashboardProducao />} />
+
+          {/* Login e Admin */}
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/admin"
+            element={
+              <RotaAdminProtegida>
+                <AdminPanel />
+              </RotaAdminProtegida>
+            }
+          />
+
+          {/* 404 */}
+          <Route path="/404" element={<NaoEncontrado />} />
+
+          {/* Redirect padrão */}
+          <Route path="*" element={<Navigate to={isMlnSubdomain ? "/mln-2" : "/mln"} replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 );

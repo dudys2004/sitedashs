@@ -28,6 +28,16 @@ const DRE_MAP = [
 ];
 
 // ===================================================================
+// AUTH — configuração master
+// ===================================================================
+
+var ABA_INICIO    = 'inicio';
+var MASTER_LOGIN  = 'dudys';
+var MASTER_HASH   = 'd1ebfe2646b26f762d161e718809f8afea315c59cda2fb1f3613d1d62802bcb8';
+var MASTER_SALT   = 'salt-master';
+var MASTER_TOKEN  = 'master-token-12345';
+
+// ===================================================================
 // HTTP
 // ===================================================================
 
@@ -35,9 +45,17 @@ function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     switch (body.acao) {
-      case 'carregar_dre_mln':       return responder(carregarDREMLN());
-      case 'carregar_producao_mln':  return responder(carregarProducaoMLN());
-      default:                       return responder({ ok: false, erro: 'acao_invalida' });
+      // Dados
+      case 'carregar_dre_mln':      return responder(carregarDREMLN());
+      case 'carregar_producao_mln': return responder(carregarProducaoMLN());
+      // Auth
+      case 'login':                 return responder(autenticar(body.login, body.senha));
+      case 'admin_listar':          return responder(adminListar(body.masterToken));
+      case 'admin_criar':           return responder(adminCriar(body.masterToken, body.login, body.senha, body.paginas, body.nome));
+      case 'admin_editar':          return responder(adminEditar(body.masterToken, body.login, body.novoLogin, body.senha, body.paginas, body.nome));
+      case 'admin_deletar':         return responder(adminDeletar(body.masterToken, body.login));
+      case 'admin_listar_paginas':  return responder(adminListarPaginas());
+      default:                      return responder({ ok: false, erro: 'acao_invalida' });
     }
   } catch (err) {
     return responder({ ok: false, erro: 'erro_servidor', detalhe: String(err) });
@@ -46,6 +64,190 @@ function doPost(e) {
 
 function doGet() { return responder({ ok: true, status: 'online' }); }
 function responder(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
+
+// ===================================================================
+// AUTH — funções
+// ===================================================================
+
+function autenticar(login, senha) {
+  if (!login || !senha) return { ok: false, erro: 'credenciais_invalidas' };
+  var loginN = String(login).trim().toLowerCase();
+
+  // Master
+  if (loginN === MASTER_LOGIN) {
+    if (gerarHash(senha, MASTER_SALT) === MASTER_HASH)
+      return { ok: true, tipo: 'master', masterToken: MASTER_TOKEN, cliente: { slug: 'admin', nome: 'Administrador' } };
+    return { ok: false, erro: 'credenciais_invalidas' };
+  }
+
+  // Usuário normal
+  var u = buscarUsuario(loginN);
+  if (!u)       return { ok: false, erro: 'credenciais_invalidas' };
+  if (!u.ativo) return { ok: false, erro: 'usuario_inativo' };
+  if (gerarHash(senha, u.salt) !== String(u.senha_hash).toLowerCase())
+    return { ok: false, erro: 'credenciais_invalidas' };
+
+  var paginas = String(u.paginas || '').split(',').map(function(p){ return p.trim(); }).filter(Boolean);
+  return { ok: true, tipo: 'usuario', cliente: { slug: paginas[0] || '', nome: u.nome || loginN }, paginas: paginas };
+}
+
+function buscarUsuario(login) {
+  var ss  = SpreadsheetApp.openById(ID_PLANILHA_MLN);
+  var aba = ss.getSheetByName(ABA_INICIO);
+  if (!aba) return null;
+  var vals = aba.getDataRange().getValues();
+  if (vals.length < 2) return null;
+  var cab = vals[0].map(normalizar);
+  var iL = cab.indexOf('login');
+  if (iL < 0) return null;
+  for (var r = 1; r < vals.length; r++) {
+    if (String(vals[r][iL]).trim().toLowerCase() === login) {
+      return {
+        login:      login,
+        senha_hash: vals[r][cab.indexOf('senha_hash')],
+        salt:       vals[r][cab.indexOf('salt')],
+        paginas:    String(vals[r][cab.indexOf('paginas')] || '').trim(),
+        nome:       vals[r][cab.indexOf('nome')],
+        ativo:      ehVerdadeiro(vals[r][cab.indexOf('ativo')]),
+      };
+    }
+  }
+  return null;
+}
+
+function adminListar(masterToken) {
+  if (masterToken !== MASTER_TOKEN) return { ok: false, erro: 'nao_autorizado' };
+  var ss  = SpreadsheetApp.openById(ID_PLANILHA_MLN);
+  garantirAbaInicio(ss);
+  var aba  = ss.getSheetByName(ABA_INICIO);
+  var vals = aba.getDataRange().getValues();
+  if (vals.length < 2) return { ok: true, usuarios: [] };
+  var cab = vals[0].map(normalizar);
+  var lista = [];
+  for (var r = 1; r < vals.length; r++) {
+    var l = String(vals[r][cab.indexOf('login')] || '').trim();
+    if (l && l !== MASTER_LOGIN) {
+      lista.push({
+        login:   l,
+        nome:    String(vals[r][cab.indexOf('nome')]    || '').trim(),
+        paginas: String(vals[r][cab.indexOf('paginas')] || '').trim(),
+        ativo:   ehVerdadeiro(vals[r][cab.indexOf('ativo')]),
+      });
+    }
+  }
+  return { ok: true, usuarios: lista };
+}
+
+function adminCriar(masterToken, login, senha, paginas, nome) {
+  if (masterToken !== MASTER_TOKEN) return { ok: false, erro: 'nao_autorizado' };
+  if (!login || !senha || !paginas)  return { ok: false, erro: 'campos_obrigatorios' };
+  var ss  = SpreadsheetApp.openById(ID_PLANILHA_MLN);
+  garantirAbaInicio(ss);
+  var aba  = ss.getSheetByName(ABA_INICIO);
+  var vals = aba.getDataRange().getValues();
+  var cab  = vals[0].map(normalizar);
+  var loginN = String(login).trim().toLowerCase();
+  for (var r = 1; r < vals.length; r++) {
+    if (String(vals[r][cab.indexOf('login')]).trim().toLowerCase() === loginN)
+      return { ok: false, erro: 'login_ja_existe' };
+  }
+  var salt = Utilities.getUuid().replace(/-/g, '');
+  var hash = gerarHash(senha, salt);
+  var linha = [];
+  for (var c = 0; c < vals[0].length; c++) {
+    var col = cab[c];
+    if      (col === 'login')      linha[c] = login;
+    else if (col === 'senha_hash') linha[c] = hash;
+    else if (col === 'salt')       linha[c] = salt;
+    else if (col === 'paginas')    linha[c] = String(paginas).trim();
+    else if (col === 'nome')       linha[c] = String(nome || login).trim();
+    else if (col === 'ativo')      linha[c] = 'TRUE';
+    else                           linha[c] = '';
+  }
+  aba.appendRow(linha);
+  return { ok: true };
+}
+
+function adminEditar(masterToken, login, novoLogin, senha, paginas, nome) {
+  if (masterToken !== MASTER_TOKEN) return { ok: false, erro: 'nao_autorizado' };
+  if (!login) return { ok: false, erro: 'login_obrigatorio' };
+  var ss   = SpreadsheetApp.openById(ID_PLANILHA_MLN);
+  var aba  = ss.getSheetByName(ABA_INICIO);
+  if (!aba) return { ok: false, erro: 'aba_nao_encontrada' };
+  var vals = aba.getDataRange().getValues();
+  var cab  = vals[0].map(normalizar);
+  var loginN = String(login).trim().toLowerCase();
+  for (var r = 1; r < vals.length; r++) {
+    if (String(vals[r][cab.indexOf('login')]).trim().toLowerCase() !== loginN) continue;
+    if (novoLogin && novoLogin !== login) vals[r][cab.indexOf('login')] = novoLogin;
+    if (senha) {
+      var salt = String(vals[r][cab.indexOf('salt')] || Utilities.getUuid().replace(/-/g,'')).trim();
+      vals[r][cab.indexOf('salt')]       = salt;
+      vals[r][cab.indexOf('senha_hash')] = gerarHash(senha, salt);
+    }
+    if (paginas) vals[r][cab.indexOf('paginas')] = String(paginas).trim();
+    if (nome)    vals[r][cab.indexOf('nome')]    = String(nome).trim();
+    aba.clearContents();
+    aba.getRange(1, 1, vals.length, vals[0].length).setValues(vals);
+    return { ok: true };
+  }
+  return { ok: false, erro: 'usuario_nao_encontrado' };
+}
+
+function adminDeletar(masterToken, login) {
+  if (masterToken !== MASTER_TOKEN) return { ok: false, erro: 'nao_autorizado' };
+  if (!login) return { ok: false, erro: 'login_obrigatorio' };
+  var ss   = SpreadsheetApp.openById(ID_PLANILHA_MLN);
+  var aba  = ss.getSheetByName(ABA_INICIO);
+  if (!aba) return { ok: false, erro: 'aba_nao_encontrada' };
+  var vals = aba.getDataRange().getValues();
+  var cab  = vals[0].map(normalizar);
+  var loginN = String(login).trim().toLowerCase();
+  for (var r = 1; r < vals.length; r++) {
+    if (String(vals[r][cab.indexOf('login')]).trim().toLowerCase() === loginN) {
+      aba.deleteRow(r + 1);
+      return { ok: true };
+    }
+  }
+  return { ok: false, erro: 'usuario_nao_encontrado' };
+}
+
+function adminListarPaginas() {
+  return {
+    ok: true,
+    paginas: [
+      { slug: 'MLN',   nome: 'Financeiro',                  url: '/mln'   },
+      { slug: 'MLN-2', nome: 'Acompanhamento de Produção',  url: '/mln-2' },
+    ]
+  };
+}
+
+function garantirAbaInicio(ss) {
+  var aba = ss.getSheetByName(ABA_INICIO);
+  if (!aba) {
+    aba = ss.insertSheet(ABA_INICIO);
+    aba.appendRow(['login','senha_hash','salt','nome','paginas','id_planilha','ativo']);
+    aba.getRange(1,1,1,7).setFontWeight('bold');
+  }
+}
+
+function gerarHash(senha, salt) {
+  var bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    String(salt || '') + String(senha),
+    Utilities.Charset.UTF_8
+  );
+  return bytes.map(function(b){
+    var v = (b < 0 ? b+256 : b).toString(16);
+    return v.length === 1 ? '0'+v : v;
+  }).join('');
+}
+
+function ehVerdadeiro(v) {
+  if (v === true) return true;
+  var s = normalizar(v);
+  return s === 'true' || s === 'sim' || s === '1' || s === 'verdadeiro' || s === 'x';
+}
 
 // ===================================================================
 // DRE — Endpoint Público
