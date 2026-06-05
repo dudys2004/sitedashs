@@ -35,8 +35,9 @@ function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     switch (body.acao) {
-      case 'carregar_dre_mln': return responder(carregarDREMLN());
-      default:                 return responder({ ok: false, erro: 'acao_invalida' });
+      case 'carregar_dre_mln':       return responder(carregarDREMLN());
+      case 'carregar_producao_mln':  return responder(carregarProducaoMLN());
+      default:                       return responder({ ok: false, erro: 'acao_invalida' });
     }
   } catch (err) {
     return responder({ ok: false, erro: 'erro_servidor', detalhe: String(err) });
@@ -56,6 +57,104 @@ function carregarDREMLN() {
     return { ok: true, dashboard: resultado };
   } catch(e) {
     return { ok: false, erro: 'erro_ao_carregar', detalhe: String(e) };
+  }
+}
+
+// ===================================================================
+// PRODUÇÃO — Endpoint Público
+// ===================================================================
+
+function carregarProducaoMLN() {
+  try {
+    var ss = SpreadsheetApp.openById(ID_PLANILHA_MLN);
+    var sheet = ss.getSheetByName('Produção');
+
+    if (!sheet) {
+      return { ok: false, erro: 'aba_nao_encontrada', detalhe: 'Aba "Produção" não existe' };
+    }
+
+    var dados = sheet.getDataRange().getValues();
+    if (!dados || dados.length < 2) {
+      return { ok: true, producao: { atualizadoEm: new Date().toISOString(), clientes: [] } };
+    }
+
+    var headers = dados[0].map(normalizar);
+    var idxCliente = acharCol(headers, ['cliente']);
+    var idxAmbiente = acharCol(headers, ['ambiente']);
+    var idxStatusMarcos = acharCol(headers, ['status marcos', 'status']);
+    var idxPrevisao = acharCol(headers, ['previsao entrega', 'previsao', 'data entrega']);
+    var idxObservacao = acharCol(headers, ['observacao', 'observacoes']);
+
+    if (idxCliente === -1 || idxStatusMarcos === -1) {
+      return { ok: false, erro: 'colunas_obrigatorias_nao_encontradas' };
+    }
+
+    var STATUS_LABELS = {
+      1: 'Planejamento',
+      2: 'Em Desenvolvimento',
+      3: 'Testes',
+      4: 'Concluído'
+    };
+
+    var clientes = [];
+    for (var i = 1; i < dados.length; i++) {
+      try {
+        var row = dados[i];
+        var cliente = String(seguro(row[idxCliente])).trim();
+        if (!cliente) continue;
+
+        var statusNum = parseInt(seguro(row[idxStatusMarcos])) || 0;
+        var previsaoEntrega = idxPrevisao >= 0 ? row[idxPrevisao] : '';
+        var dataISO = formatarDataISO(previsaoEntrega);
+
+        clientes.push({
+          cliente: cliente,
+          ambiente: idxAmbiente >= 0 ? String(seguro(row[idxAmbiente])).trim() || 'N/A' : 'N/A',
+          statusMarcos: statusNum,
+          statusMarcosLabel: STATUS_LABELS[statusNum] || 'Desconhecido',
+          previsaoEntrega: dataISO,
+          observacao: idxObservacao >= 0 ? String(seguro(row[idxObservacao])).trim() || '' : ''
+        });
+      } catch(erroLinha) {
+        // Ignora linhas com erro
+        continue;
+      }
+    }
+
+    return {
+      ok: true,
+      producao: {
+        atualizadoEm: new Date().toISOString(),
+        clientes: clientes
+      }
+    };
+  } catch(e) {
+    return { ok: false, erro: 'erro_ao_carregar', detalhe: String(e) };
+  }
+}
+
+function formatarDataISO(dateObj) {
+  try {
+    if (!dateObj) return new Date().toISOString().split('T')[0];
+
+    // Se for um número (serial do Google Sheets)
+    if (typeof dateObj === 'number') {
+      var date = new Date((dateObj - 25569) * 86400 * 1000);
+      return date.toISOString().split('T')[0];
+    }
+
+    // Se for string, tenta parsear
+    if (typeof dateObj === 'string') {
+      var date = new Date(dateObj);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    }
+
+    // Fallback
+    return new Date().toISOString().split('T')[0];
+  } catch(e) {
+    return new Date().toISOString().split('T')[0];
   }
 }
 
