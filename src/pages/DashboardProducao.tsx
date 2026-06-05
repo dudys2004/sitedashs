@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { carregarProducaoMLN } from "../lib/api";
-import type { ProducaoData, ProducaoItem } from "../lib/types";
+import type { ProducaoData } from "../lib/types";
 
 const VERDE = "#1a5c4e";
 const BG = "#f4f4f0";
