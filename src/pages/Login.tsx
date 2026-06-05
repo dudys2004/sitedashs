@@ -30,20 +30,14 @@ export function Login() {
       style={{ backgroundColor: "#0f172a" }}
     >
       <div className="w-full max-w-sm">
-        {/* Logo / ícone */}
+        {/* Logo */}
         <div className="mb-8 text-center">
-          <div
-            className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
-            style={{ backgroundColor: "rgba(99,102,241,0.15)", boxShadow: "0 0 0 1px rgba(99,102,241,0.3)" }}
-          >
-            <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 3v18h18" />
-              <rect x="7" y="10" width="3" height="7" />
-              <rect x="12" y="6" width="3" height="11" />
-              <rect x="17" y="13" width="3" height="4" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-semibold" style={{ color: "#f1f5f9" }}>Portal de Dashboards</h1>
+          <img
+            src="/logos/logo nortem.png"
+            alt="Nortem"
+            style={{ height: 72, width: "auto", margin: "0 auto 16px", display: "block" }}
+          />
+          <h1 className="text-xl font-semibold" style={{ color: "#f1f5f9" }}>Portal Nortem</h1>
           <p className="mt-1 text-sm" style={{ color: "#94a3b8" }}>Entre para acessar seu painel</p>
         </div>
 
