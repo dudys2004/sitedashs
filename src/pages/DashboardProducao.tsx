@@ -181,10 +181,8 @@ export function DashboardProducao() {
     atrasados:   dadosTabela.filter(isAtrasado).length,
   }), [dadosTabela]);
 
-  // Dados para os gráficos (respeitam filtro)
-  const dadosGraficos = useMemo(() =>
-    clienteSelecionado ? dadosTabela : (dados?.clientes ?? []),
-  [dadosTabela, clienteSelecionado, dados]);
+  // Dados para os gráficos — sempre globais, sem influência do filtro de cliente
+  const dadosGraficos = useMemo(() => dados?.clientes ?? [], [dados]);
 
   // Dados de cada gráfico
   const gBairro       = useMemo(() => compactarPizza(contarPorCampo(dadosGraficos, "bairro"),       10), [dadosGraficos]);
@@ -240,7 +238,7 @@ export function DashboardProducao() {
       <header
         className="sticky top-0 z-10 border-b"
         style={{
-          overflow:"visible", borderColor:"#c8bfb0",
+          borderColor:"#c8bfb0",
           backgroundImage:`
             repeating-linear-gradient(-62deg, transparent 0px, transparent 7px, rgba(160,160,160,0.07) 7px, rgba(160,160,160,0.07) 8px),
             repeating-linear-gradient(28deg,  transparent 0px, transparent 12px, rgba(180,180,180,0.05) 12px, rgba(180,180,180,0.05) 13px),
@@ -252,19 +250,16 @@ export function DashboardProducao() {
           backgroundColor:"#ffffff",
         }}
       >
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-6 py-6">
+        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-4 py-3 sm:px-6 sm:py-6">
           {/* Logo */}
-          <div style={{ position:"relative", width:90, flexShrink:0, alignSelf:"stretch" }}>
-            <img
-              src="/logos/MLN.png" alt="Logo MLN"
-              style={{
-                height:112, width:"auto", objectFit:"contain",
-                position:"absolute", left:0, top:"50%", transform:"translateY(-50%)",
-                filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.22))", zIndex:20,
-              }}
-              onError={e => { (e.target as HTMLImageElement).style.display="none"; }}
-            />
-          </div>
+          <img
+            src="/logos/MLN.png" alt="Logo MLN"
+            style={{
+              height:68, width:"auto", objectFit:"contain",
+              flexShrink:0, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.22))",
+            }}
+            onError={e => { (e.target as HTMLImageElement).style.display="none"; }}
+          />
 
           {/* Título */}
           <h1 className="text-3xl font-bold" style={{ color:VERDE }}>

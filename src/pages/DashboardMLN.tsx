@@ -202,11 +202,32 @@ export function DashboardMLN() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: BG }}>
+
+      {/* Seta discreta lateral → MLN_2 */}
+      <a
+        href="/mln-2"
+        title="Acompanhamento de Produção"
+        style={{
+          position: "fixed", right: 0, top: "50%", transform: "translateY(-50%)",
+          backgroundColor: VERDE, color: "#ffffff",
+          width: 22, padding: "22px 0",
+          borderRadius: "6px 0 0 6px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, textDecoration: "none",
+          opacity: 0.45, fontSize: 18, lineHeight: 1,
+          boxShadow: "-2px 2px 10px rgba(0,0,0,0.18)",
+          transition: "opacity 0.2s, width 0.2s",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "34px"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
+      >
+        ›
+      </a>
+
       {/* Header com textura de mármore */}
       <header
         className="sticky top-0 z-10 border-b"
         style={{
-          overflow: "visible",
           borderColor: "#c8bfb0",
           backgroundImage: `
             repeating-linear-gradient(-62deg, transparent 0px, transparent 7px, rgba(160,160,160,0.07) 7px, rgba(160,160,160,0.07) 8px),
@@ -219,54 +240,37 @@ export function DashboardMLN() {
           backgroundColor: "#ffffff",
         }}
       >
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-6 py-4">
-          {/* Wrapper com largura fixa — logo é absoluta e não infla o header */}
-          <div style={{ position: "relative", width: 80, flexShrink: 0, alignSelf: "stretch" }}>
-            <img
-              src="/logos/MLN.png"
-              alt="Logo MLN"
-              style={{
-                height: 96,
-                width: "auto",
-                objectFit: "contain",
-                position: "absolute",
-                left: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
-                filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.22))",
-                zIndex: 20,
-              }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-          </div>
+        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-4 py-3 sm:px-6 sm:py-4">
+          <img
+            src="/logos/MLN.png"
+            alt="Logo MLN"
+            style={{
+              height: 68,
+              width: "auto",
+              objectFit: "contain",
+              flexShrink: 0,
+              filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.22))",
+            }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
           <h1 className="text-2xl font-bold" style={{ color: VERDE }}>
             Marmoaria Leão do Norte
           </h1>
 
-          <FiltrosDRE
-            mesesDisponiveis={modo === "caixa" ? (dados.mesesDisponiveisCaixa ?? dados.mesesDisponiveis) : dados.mesesDisponiveis}
-            mesInicial={mesInicial}
-            mesFinal={mesFinal}
-            unidade={unidade}
-            unidades={["Consolidado", ...(modo === "caixa" ? (dados.unidadesCaixa ?? dados.unidades) : dados.unidades).filter((u) => u !== "Consolidado" && u !== "Geral")]}
-            modo={modo}
-            onMesInicialChange={setMesInicial}
-            onMesFinalChange={setMesFinal}
-            onUnidadeChange={setUnidade}
-            onModoChange={setModo}
-          />
-          <a
-            href="/mln-2"
-            className="px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-            style={{
-              backgroundColor: VERDE,
-              color: "#ffffff",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            Acompanhamento →
-          </a>
+          <div className="ml-auto">
+            <FiltrosDRE
+              mesesDisponiveis={modo === "caixa" ? (dados.mesesDisponiveisCaixa ?? dados.mesesDisponiveis) : dados.mesesDisponiveis}
+              mesInicial={mesInicial}
+              mesFinal={mesFinal}
+              unidade={unidade}
+              unidades={["Consolidado", ...(modo === "caixa" ? (dados.unidadesCaixa ?? dados.unidades) : dados.unidades).filter((u) => u !== "Consolidado" && u !== "Geral")]}
+              modo={modo}
+              onMesInicialChange={setMesInicial}
+              onMesFinalChange={setMesFinal}
+              onUnidadeChange={setUnidade}
+              onModoChange={setModo}
+            />
+          </div>
         </div>
       </header>
 
