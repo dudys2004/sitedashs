@@ -89,13 +89,6 @@ function carregarProducaoMLN() {
       return { ok: false, erro: 'colunas_obrigatorias_nao_encontradas' };
     }
 
-    var STATUS_LABELS = {
-      1: 'Planejamento',
-      2: 'Em Desenvolvimento',
-      3: 'Testes',
-      4: 'Concluído'
-    };
-
     var clientes = [];
     for (var i = 1; i < dados.length; i++) {
       try {
@@ -103,7 +96,8 @@ function carregarProducaoMLN() {
         var cliente = String(seguro(row[idxCliente])).trim();
         if (!cliente) continue;
 
-        var statusNum = parseInt(seguro(row[idxStatusMarcos])) || 0;
+        var statusRaw = String(seguro(row[idxStatusMarcos])).trim();
+        var statusNum = parseInt(statusRaw) || 0;
         var previsaoEntrega = idxPrevisao >= 0 ? row[idxPrevisao] : '';
         var dataISO = formatarDataISO(previsaoEntrega);
 
@@ -111,7 +105,7 @@ function carregarProducaoMLN() {
           cliente: cliente,
           ambiente: idxAmbiente >= 0 ? String(seguro(row[idxAmbiente])).trim() || 'N/A' : 'N/A',
           statusMarcos: statusNum,
-          statusMarcosLabel: STATUS_LABELS[statusNum] || 'Desconhecido',
+          statusMarcosLabel: statusRaw || String(statusNum),
           previsaoEntrega: dataISO,
           observacao: idxObservacao >= 0 ? String(seguro(row[idxObservacao])).trim() || '' : ''
         });
