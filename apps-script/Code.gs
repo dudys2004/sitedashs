@@ -79,14 +79,24 @@ function carregarProducaoMLN() {
     }
 
     var headers = dados[0].map(normalizar);
-    var idxCliente = acharCol(headers, ['cliente']);
-    var idxAmbiente = acharCol(headers, ['ambiente']);
-    var idxStatusMarcos = acharCol(headers, ['status marcos', 'status']);
-    var idxPrevisao = acharCol(headers, ['previsao entrega', 'previsao', 'data entrega']);
-    var idxObservacao = acharCol(headers, ['observacao', 'observacoes']);
+    var idxCliente      = acharCol(headers, ['cliente']);
+    var idxAmbiente     = acharCol(headers, ['ambiente']);
+    var idxStatusMarcos = acharCol(headers, ['status marcos']);
+    var idxPrevisao     = acharCol(headers, ['previsao de entrega', 'previsao entrega', 'previsao', 'data entrega']);
+    var idxObservacao   = acharCol(headers, ['observacao', 'observacoes']);
+    // Novas colunas analíticas
+    var idxBairro       = acharCol(headers, ['bairro']);
+    var idxMontador     = acharCol(headers, ['montador']);
+    var idxProfissional = acharCol(headers, ['profissional']);
+    var idxMaterial     = acharCol(headers, ['material']);
+    // STATUS (coluna diferente de STATUS MARCOS) — busca exata por 'status' sem 'marcos'
+    var idxStatus = -1;
+    for (var j = 0; j < headers.length; j++) {
+      if (headers[j].indexOf('status') >= 0 && headers[j].indexOf('marcos') < 0) { idxStatus = j; break; }
+    }
 
-    if (idxCliente === -1 || idxStatusMarcos === -1) {
-      return { ok: false, erro: 'colunas_obrigatorias_nao_encontradas' };
+    if (idxCliente === -1) {
+      return { ok: false, erro: 'coluna_cliente_nao_encontrada' };
     }
 
     var clientes = [];
@@ -96,21 +106,27 @@ function carregarProducaoMLN() {
         var cliente = String(seguro(row[idxCliente])).trim();
         if (!cliente) continue;
 
-        var statusRaw = String(seguro(row[idxStatusMarcos])).trim();
+        var statusRaw = idxStatusMarcos >= 0 ? String(seguro(row[idxStatusMarcos])).trim() : '';
         var statusNum = parseInt(statusRaw) || 0;
         var previsaoEntrega = idxPrevisao >= 0 ? row[idxPrevisao] : '';
         var dataISO = formatarDataISO(previsaoEntrega);
 
+        function col(idx) { return idx >= 0 ? String(seguro(row[idx])).trim() : ''; }
+
         clientes.push({
-          cliente: cliente,
-          ambiente: idxAmbiente >= 0 ? String(seguro(row[idxAmbiente])).trim() || 'N/A' : 'N/A',
-          statusMarcos: statusNum,
-          statusMarcosLabel: statusRaw || String(statusNum),
-          previsaoEntrega: dataISO,
-          observacao: idxObservacao >= 0 ? String(seguro(row[idxObservacao])).trim() || '' : ''
+          cliente:          cliente,
+          ambiente:         col(idxAmbiente)     || '',
+          statusMarcos:     statusNum,
+          statusMarcosLabel: statusRaw            || String(statusNum),
+          previsaoEntrega:  dataISO,
+          observacao:       col(idxObservacao)   || '',
+          bairro:           col(idxBairro)       || '',
+          status:           col(idxStatus)       || '',
+          montador:         col(idxMontador)     || '',
+          profissional:     col(idxProfissional) || '',
+          material:         col(idxMaterial)     || ''
         });
       } catch(erroLinha) {
-        // Ignora linhas com erro
         continue;
       }
     }

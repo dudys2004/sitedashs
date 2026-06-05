@@ -60,6 +60,12 @@ export interface ProducaoItem {
   previsaoEntrega: string;
   observacao: string;
   dataAtualizacao?: string;
+  // Colunas analíticas
+  bairro: string;
+  status: string;
+  montador: string;
+  profissional: string;
+  material: string;
 }
 
 export interface ProducaoData {
