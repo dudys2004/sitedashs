@@ -19,7 +19,7 @@ const CHAVE = "site-dashs:sessao";
 const AuthContext = createContext<AuthContextValor | null>(null);
 
 function lerSessao(): Sessao | null {
-  try { const s = sessionStorage.getItem(CHAVE); return s ? JSON.parse(s) : null; }
+  try { const s = localStorage.getItem(CHAVE); return s ? JSON.parse(s) : null; }
   catch { return null; }
 }
 
@@ -30,14 +30,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const resp = await apiLogin(usuario, senha);
     if (resp.ok) {
       const nova: Sessao = { tipo: resp.tipo, cliente: resp.cliente, paginas: resp.paginas, masterToken: resp.masterToken };
-      sessionStorage.setItem(CHAVE, JSON.stringify(nova));
+      localStorage.setItem(CHAVE, JSON.stringify(nova));
       setSessao(nova);
     }
     return resp;
   }, []);
 
   const sair = useCallback(() => {
-    sessionStorage.removeItem(CHAVE);
+    localStorage.removeItem(CHAVE);
     setSessao(null);
   }, []);
 
