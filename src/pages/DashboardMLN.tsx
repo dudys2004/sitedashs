@@ -247,19 +247,6 @@ export function DashboardMLN() {
           </h1>
 
           <div className="ml-auto flex items-center gap-4">
-            <FiltrosDRE
-              mesesDisponiveis={modo === "caixa" ? (dados.mesesDisponiveisCaixa ?? dados.mesesDisponiveis) : dados.mesesDisponiveis}
-              mesInicial={mesInicial}
-              mesFinal={mesFinal}
-              unidade={unidade}
-              unidades={["Consolidado", ...(modo === "caixa" ? (dados.unidadesCaixa ?? dados.unidades) : dados.unidades).filter((u) => u !== "Consolidado" && u !== "Geral")]}
-              modo={modo}
-              onMesInicialChange={setMesInicial}
-              onMesFinalChange={setMesFinal}
-              onUnidadeChange={setUnidade}
-              onModoChange={setModo}
-            />
-
             {/* Informações do usuário */}
             <div style={{ textAlign: "right", paddingLeft: 12, borderLeft: "1px solid #e5e7eb" }}>
               <p style={{ fontSize: 13, fontWeight: 500, color: VERDE, margin: 0 }}>{sessao?.cliente.nome || "Usuário"}</p>
@@ -309,6 +296,24 @@ export function DashboardMLN() {
           <span style={{ fontSize: 15, lineHeight: 1 }}>›</span>
         </a>
       </header>
+
+      {/* Barra de filtros — logo abaixo do header */}
+      <div>
+        <div className="mx-auto max-w-[1400px] px-6">
+          <FiltrosDRE
+            mesesDisponiveis={modo === "caixa" ? (dados.mesesDisponiveisCaixa ?? dados.mesesDisponiveis) : dados.mesesDisponiveis}
+            mesInicial={mesInicial}
+            mesFinal={mesFinal}
+            unidade={unidade}
+            unidades={["Consolidado", ...(modo === "caixa" ? (dados.unidadesCaixa ?? dados.unidades) : dados.unidades).filter((u) => u !== "Consolidado" && u !== "Geral")]}
+            modo={modo}
+            onMesInicialChange={setMesInicial}
+            onMesFinalChange={setMesFinal}
+            onUnidadeChange={setUnidade}
+            onModoChange={setModo}
+          />
+        </div>
+      </div>
 
       {/* Corpo principal: 2 colunas */}
       <main className="mx-auto grid max-w-[1400px] grid-cols-1 gap-5 px-6 pb-5 pt-10 lg:grid-cols-[400px_1fr]">

@@ -506,9 +506,9 @@ export function DashboardProducao() {
                       >
                         <td className="px-6 py-4 font-medium">{item.cliente}</td>
                         <td className="px-6 py-4">{item.ambiente || "—"}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4" style={{ whiteSpace: "nowrap" }}>
                           <span className="px-3 py-1 rounded-full text-xs font-semibold"
-                            style={{ backgroundColor:corStatus(item.statusMarcos)+"20", color:corStatus(item.statusMarcos) }}>
+                            style={{ backgroundColor:corStatus(item.statusMarcos)+"20", color:corStatus(item.statusMarcos), whiteSpace: "nowrap" }}>
                             {item.statusMarcosLabel}
                           </span>
                         </td>
