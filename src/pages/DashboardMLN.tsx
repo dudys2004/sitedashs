@@ -1,4 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { carregarDREMLN } from "../lib/api";
 import type { DREData, DREPorMes, KPIsDRE } from "../lib/types";
 import { FiltrosDRE } from "../components/FiltrosDRE";
@@ -20,6 +22,8 @@ const kpisZerado: KPIsDRE = {
 };
 
 export function DashboardMLN() {
+  const navigate = useNavigate();
+  const { sessao, sair } = useAuth();
   const [dados, setDados] = useState<DREData | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [progresso, setProgresso] = useState(0);
@@ -28,6 +32,11 @@ export function DashboardMLN() {
   const [mesFinal, setMesFinal] = useState("");
   const [unidade, setUnidade] = useState("Consolidado");
   const [modo, setModo] = useState<"competencia" | "caixa">("competencia");
+
+  function aoSair() {
+    sair();
+    navigate("/login");
+  }
 
   // Força tema claro na página
   useEffect(() => {
@@ -237,7 +246,7 @@ export function DashboardMLN() {
             Marmoaria Leão do Norte
           </h1>
 
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-4">
             <FiltrosDRE
               mesesDisponiveis={modo === "caixa" ? (dados.mesesDisponiveisCaixa ?? dados.mesesDisponiveis) : dados.mesesDisponiveis}
               mesInicial={mesInicial}
@@ -250,27 +259,62 @@ export function DashboardMLN() {
               onUnidadeChange={setUnidade}
               onModoChange={setModo}
             />
+
+            {/* Informações do usuário e botão de sair */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, paddingLeft: 12, borderLeft: "1px solid #e5e7eb" }}>
+              <div style={{ textAlign: "right" }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: VERDE }}>{sessao?.cliente.nome || "Usuário"}</p>
+                <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{sessao?.cliente.slug}</p>
+              </div>
+              <button
+                onClick={aoSair}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: 6,
+                  backgroundColor: "#fee2e2",
+                  color: "#dc2626",
+                  border: "1px solid #fca5a5",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fecaca";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#f87171";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fee2e2";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#fca5a5";
+                }}
+              >
+                Sair
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Seta discreta → MLN-2 */}
         <a
           href="/mln-2"
-          title="MLN-2"
+          title="Clientes"
           style={{
             position: "absolute", right: 0, top: 0, bottom: 0, width: 22,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column",
+            gap: 4,
             backgroundColor: VERDE, color: "#ffffff",
             borderRadius: "6px 0 0 6px",
             textDecoration: "none", fontSize: 20, lineHeight: 1,
             opacity: 0.45, zIndex: 10,
             boxShadow: "-2px 0 10px rgba(0,0,0,0.15)",
             transition: "opacity 0.2s, width 0.2s",
+            paddingBottom: 2,
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "34px"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "50px"; }}
           onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
         >
-          ›
+          <span style={{ fontSize: 20 }}>›</span>
+          <span style={{ fontSize: 9, fontWeight: 500, writingMode: "vertical-lr", transform: "rotate(180deg)", whiteSpace: "nowrap", letterSpacing: -0.5 }}>Clientes</span>
         </a>
       </header>
 
