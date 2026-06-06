@@ -260,31 +260,27 @@ export function DashboardMLN() {
               onModoChange={setModo}
             />
 
-            {/* Informações do usuário e botão de sair */}
+            {/* Informações do usuário */}
             <div style={{ textAlign: "right", paddingLeft: 12, borderLeft: "1px solid #e5e7eb" }}>
               <p style={{ fontSize: 13, fontWeight: 500, color: VERDE, margin: 0 }}>{sessao?.cliente.nome || "Usuário"}</p>
-              <p style={{ fontSize: 11, color: "#9ca3af", margin: "2px 0 0 0" }}>{sessao?.cliente.slug}</p>
-              <button
+              <p style={{ fontSize: 11, color: "#9ca3af", margin: "2px 0 4px 0" }}>{sessao?.cliente.slug}</p>
+              <span
                 onClick={aoSair}
                 style={{
-                  background: "none",
-                  border: "none",
+                  fontSize: 11,
                   color: "#9ca3af",
-                  fontSize: 10,
                   cursor: "pointer",
-                  padding: "2px 0",
-                  marginTop: 4,
                   transition: "color 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color = VERDE;
+                  (e.currentTarget as HTMLSpanElement).style.color = VERDE;
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color = "#9ca3af";
+                  (e.currentTarget as HTMLSpanElement).style.color = "#9ca3af";
                 }}
               >
                 sair
-              </button>
+              </span>
             </div>
           </div>
         </div>
