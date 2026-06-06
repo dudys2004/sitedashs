@@ -1,3 +1,7 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "domains": [
+    "site-dashs.vercel.app",
+    "admin.nortemconsultoria.com.br"
+  ]
 }
