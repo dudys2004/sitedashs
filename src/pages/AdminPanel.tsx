@@ -378,7 +378,7 @@ export function AdminPanel() {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${BORD}` }}>
-                    {["Nome", "Login", "Páginas com acesso", "Status", "Ações"].map(h => (
+                    {["Nome", "Login", "Senha Hash", "Páginas com acesso", "Status", "Ações"].map(h => (
                       <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: MUTED, whiteSpace: "nowrap" }}>{h}</th>
                     ))}
                   </tr>
@@ -388,6 +388,7 @@ export function AdminPanel() {
                     <tr key={u.login} style={{ borderBottom: `1px solid ${BORD}22` }}>
                       <td style={{ padding: "12px 12px", color: TEXT, fontWeight: 500 }}>{u.nome}</td>
                       <td style={{ padding: "12px 12px", color: MUTED }}>{u.login}</td>
+                      <td style={{ padding: "12px 12px", color: MUTED, fontSize: 11, fontFamily: "monospace", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={u.senha_hash}>{u.senha_hash}</td>
                       <td style={{ padding: "12px 12px" }}>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           {(u.paginas || "").split(",").filter(Boolean).map(p => (

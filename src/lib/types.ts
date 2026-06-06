@@ -98,6 +98,8 @@ export interface UsuarioAdmin {
   login: string;
   nome: string;
   paginas: string;
+  senha_hash: string;
+  salt: string;
   ativo: boolean;
 }
 

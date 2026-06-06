@@ -128,10 +128,12 @@ function adminListar(masterToken) {
     var l = String(vals[r][cab.indexOf('login')] || '').trim();
     if (l && l !== MASTER_LOGIN) {
       lista.push({
-        login:   l,
-        nome:    String(vals[r][cab.indexOf('nome')]    || '').trim(),
-        paginas: String(vals[r][cab.indexOf('paginas')] || '').trim(),
-        ativo:   ehVerdadeiro(vals[r][cab.indexOf('ativo')]),
+        login:      l,
+        nome:       String(vals[r][cab.indexOf('nome')]         || '').trim(),
+        paginas:    String(vals[r][cab.indexOf('paginas')]      || '').trim(),
+        senha_hash: String(vals[r][cab.indexOf('senha_hash')]   || '').trim(),
+        salt:       String(vals[r][cab.indexOf('salt')]         || '').trim(),
+        ativo:      ehVerdadeiro(vals[r][cab.indexOf('ativo')]),
       });
     }
   }
