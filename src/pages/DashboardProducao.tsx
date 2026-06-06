@@ -307,21 +307,21 @@ export function DashboardProducao() {
           title="Financeiro"
           style={{
             position: "absolute", left: 0, top: "100%",
-            width: 32, height: 30,
+            height: 30,
             display: "flex", alignItems: "center", justifyContent: "flex-start",
-            gap: 6, padding: "0 10px",
+            gap: 5, padding: "0 12px",
             backgroundColor: VERDE, color: "#ffffff",
             borderRadius: "0 0 8px 0",
             textDecoration: "none",
-            opacity: 0.4, zIndex: 10,
-            overflow: "hidden", whiteSpace: "nowrap",
+            opacity: 0.5, zIndex: 10,
+            whiteSpace: "nowrap",
             boxShadow: "2px 2px 8px rgba(0,0,0,0.10)",
-            transition: "opacity 0.25s, width 0.25s",
+            transition: "opacity 0.2s",
           }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = "0.95"; e.currentTarget.style.width = "115px"; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = "0.4"; e.currentTarget.style.width = "32px"; }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = "1"; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = "0.5"; }}
         >
-          <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>‹</span>
+          <span style={{ fontSize: 15, lineHeight: 1 }}>‹</span>
           <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0.3 }}>Financeiro</span>
         </a>
       </header>
