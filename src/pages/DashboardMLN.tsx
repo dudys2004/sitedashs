@@ -285,27 +285,28 @@ export function DashboardMLN() {
           </div>
         </div>
 
-        {/* Seta discreta → MLN-2 (logo abaixo do header) */}
+        {/* Aba → Clientes (logo abaixo do header, lado direito) */}
         <a
           href="/mln-2"
           title="Clientes"
           style={{
             position: "absolute", right: 0, top: "100%",
-            width: 18, height: 48,
-            display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column",
-            gap: 3,
+            width: 32, height: 30,
+            display: "flex", alignItems: "center", justifyContent: "flex-end",
+            gap: 6, padding: "0 10px",
             backgroundColor: VERDE, color: "#ffffff",
-            borderRadius: "0 0 0 6px",
+            borderRadius: "0 0 0 8px",
             textDecoration: "none",
-            opacity: 0.35, zIndex: 10,
-            boxShadow: "-2px 2px 8px rgba(0,0,0,0.12)",
-            transition: "opacity 0.2s, width 0.2s",
+            opacity: 0.4, zIndex: 10,
+            overflow: "hidden", whiteSpace: "nowrap",
+            boxShadow: "-2px 2px 8px rgba(0,0,0,0.10)",
+            transition: "opacity 0.25s, width 0.25s",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "44px"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.35"; e.currentTarget.style.width = "18px"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.95"; e.currentTarget.style.width = "105px"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.4"; e.currentTarget.style.width = "32px"; }}
         >
-          <span style={{ fontSize: 16 }}>›</span>
-          <span style={{ fontSize: 8, fontWeight: 500, writingMode: "vertical-lr", transform: "rotate(180deg)", whiteSpace: "nowrap", letterSpacing: -0.5 }}>Clientes</span>
+          <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0.3 }}>Clientes</span>
+          <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>›</span>
         </a>
       </header>
 
