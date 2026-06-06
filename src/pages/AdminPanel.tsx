@@ -212,18 +212,14 @@ export function AdminPanel() {
           <button
             onClick={sairEVoltar}
             style={{
-              background: "none",
-              border: "none",
-              color: MUTED,
-              fontSize: 12,
-              cursor: "pointer",
-              padding: "2px 4px",
-              transition: "color 0.2s",
+              padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500,
+              border: `1px solid ${BORD}`, color: MUTED, backgroundColor: "transparent",
+              cursor: "pointer", transition: "all 0.15s",
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "#ef4444"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = MUTED; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#f87171"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = BORD; e.currentTarget.style.color = MUTED; }}
           >
-            sair
+            Sair
           </button>
         </div>
       </header>

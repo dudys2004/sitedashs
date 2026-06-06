@@ -285,27 +285,27 @@ export function DashboardMLN() {
           </div>
         </div>
 
-        {/* Seta discreta → MLN-2 */}
+        {/* Seta discreta → MLN-2 (logo abaixo do header) */}
         <a
           href="/mln-2"
           title="Clientes"
           style={{
-            position: "absolute", right: 0, top: 0, bottom: 0, width: 22,
+            position: "absolute", right: 0, top: "100%",
+            width: 18, height: 48,
             display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column",
-            gap: 4,
+            gap: 3,
             backgroundColor: VERDE, color: "#ffffff",
-            borderRadius: "6px 0 0 6px",
-            textDecoration: "none", fontSize: 20, lineHeight: 1,
-            opacity: 0.45, zIndex: 10,
-            boxShadow: "-2px 0 10px rgba(0,0,0,0.15)",
+            borderRadius: "0 0 0 6px",
+            textDecoration: "none",
+            opacity: 0.35, zIndex: 10,
+            boxShadow: "-2px 2px 8px rgba(0,0,0,0.12)",
             transition: "opacity 0.2s, width 0.2s",
-            paddingBottom: 2,
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "50px"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "44px"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.35"; e.currentTarget.style.width = "18px"; }}
         >
-          <span style={{ fontSize: 20 }}>›</span>
-          <span style={{ fontSize: 9, fontWeight: 500, writingMode: "vertical-lr", transform: "rotate(180deg)", whiteSpace: "nowrap", letterSpacing: -0.5 }}>Clientes</span>
+          <span style={{ fontSize: 16 }}>›</span>
+          <span style={{ fontSize: 8, fontWeight: 500, writingMode: "vertical-lr", transform: "rotate(180deg)", whiteSpace: "nowrap", letterSpacing: -0.5 }}>Clientes</span>
         </a>
       </header>
 

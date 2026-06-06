@@ -301,27 +301,27 @@ export function DashboardProducao() {
 
         </div>
 
-        {/* Seta discreta ← MLN */}
+        {/* Seta discreta ← MLN (logo abaixo do header) */}
         <a
           href="/mln"
           title="Financeiro"
           style={{
-            position: "absolute", left: 0, top: 0, bottom: 0, width: 22,
+            position: "absolute", left: 0, top: "100%",
+            width: 18, height: 48,
             display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column",
-            gap: 4,
+            gap: 3,
             backgroundColor: VERDE, color: "#ffffff",
-            borderRadius: "0 6px 6px 0",
-            textDecoration: "none", fontSize: 20, lineHeight: 1,
-            opacity: 0.45, zIndex: 10,
-            boxShadow: "2px 0 10px rgba(0,0,0,0.15)",
+            borderRadius: "0 0 6px 0",
+            textDecoration: "none",
+            opacity: 0.35, zIndex: 10,
+            boxShadow: "2px 2px 8px rgba(0,0,0,0.12)",
             transition: "opacity 0.2s, width 0.2s",
-            paddingBottom: 2,
           }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "56px"; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = "0.45"; e.currentTarget.style.width = "22px"; }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.width = "48px"; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = "0.35"; e.currentTarget.style.width = "18px"; }}
         >
-          <span style={{ fontSize: 20 }}>‹</span>
-          <span style={{ fontSize: 9, fontWeight: 500, writingMode: "vertical-lr", whiteSpace: "nowrap", letterSpacing: -0.5 }}>Financeiro</span>
+          <span style={{ fontSize: 16 }}>‹</span>
+          <span style={{ fontSize: 8, fontWeight: 500, writingMode: "vertical-lr", whiteSpace: "nowrap", letterSpacing: -0.5 }}>Financeiro</span>
         </a>
       </header>
 
