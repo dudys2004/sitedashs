@@ -261,34 +261,29 @@ export function DashboardMLN() {
             />
 
             {/* Informações do usuário e botão de sair */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, paddingLeft: 12, borderLeft: "1px solid #e5e7eb" }}>
-              <div style={{ textAlign: "right" }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: VERDE }}>{sessao?.cliente.nome || "Usuário"}</p>
-                <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{sessao?.cliente.slug}</p>
-              </div>
+            <div style={{ textAlign: "right", paddingLeft: 12, borderLeft: "1px solid #e5e7eb" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: VERDE, margin: 0 }}>{sessao?.cliente.nome || "Usuário"}</p>
+              <p style={{ fontSize: 11, color: "#9ca3af", margin: "2px 0 0 0" }}>{sessao?.cliente.slug}</p>
               <button
                 onClick={aoSair}
                 style={{
-                  padding: "6px 12px",
-                  borderRadius: 6,
-                  backgroundColor: "#fee2e2",
-                  color: "#dc2626",
-                  border: "1px solid #fca5a5",
-                  fontSize: 12,
-                  fontWeight: 500,
+                  background: "none",
+                  border: "none",
+                  color: "#9ca3af",
+                  fontSize: 10,
                   cursor: "pointer",
-                  transition: "all 0.2s",
+                  padding: "2px 0",
+                  marginTop: 4,
+                  transition: "color 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fecaca";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#f87171";
+                  (e.currentTarget as HTMLButtonElement).style.color = VERDE;
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fee2e2";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#fca5a5";
+                  (e.currentTarget as HTMLButtonElement).style.color = "#9ca3af";
                 }}
               >
-                Sair
+                sair
               </button>
             </div>
           </div>
