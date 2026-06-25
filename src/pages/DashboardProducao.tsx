@@ -101,6 +101,9 @@ export function DashboardProducao() {
   const [busca, setBusca]                           = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Filtro de status dos KPIs
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "concluidos" | "emAndamento" | "atrasados">("todos");
+
   // Ordenação da tabela
   const [ordCol, setOrdCol] = useState<Col>("previsaoEntrega");
   const [ordDir, setOrdDir] = useState<"asc"|"desc">("asc");
@@ -166,9 +169,19 @@ export function DashboardProducao() {
   // Dados para tabela (filtrados + ordenados)
   const dadosTabela = useMemo(() => {
     if (!dados) return [];
-    const items = clienteSelecionado
+    let items = clienteSelecionado
       ? dados.clientes.filter(i => i.cliente === clienteSelecionado)
       : dados.clientes;
+
+    // Aplica filtro de status dos KPIs
+    if (filtroStatus === "concluidos") {
+      items = items.filter(isConcluido);
+    } else if (filtroStatus === "atrasados") {
+      items = items.filter(isAtrasado);
+    } else if (filtroStatus === "emAndamento") {
+      items = items.filter(i => !isConcluido(i));
+    }
+
     return [...items].sort((a, b) => {
       let va: string|number = "", vb: string|number = "";
       if (ordCol === "cliente")         { va = a.cliente;         vb = b.cliente; }
@@ -180,7 +193,7 @@ export function DashboardProducao() {
       if (va > vb) return ordDir === "asc" ?  1 : -1;
       return 0;
     });
-  }, [dados, clienteSelecionado, ordCol, ordDir]);
+  }, [dados, clienteSelecionado, ordCol, ordDir, filtroStatus]);
 
   // KPIs (respeitam filtro)
   const stats = useMemo(() => ({
@@ -449,16 +462,28 @@ export function DashboardProducao() {
         {/* ── KPIs ── */}
         <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
           {[
-            { label:"Total de Projetos",  valor:stats.total,       cor:VERDE },
-            { label:"Concluídos",         valor:stats.concluidos,  cor:"#10b981" },
-            { label:"Em Andamento",       valor:stats.emAndamento, cor:"#3b82f6" },
-            { label:"Atrasados",          valor:stats.atrasados,   cor:"#ef4444" },
-          ].map(({ label, valor, cor }) => (
-            <div key={label} className="p-6 rounded-xl" style={{ backgroundColor:"#ffffff", border:"1px solid #e5e7eb" }}>
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color:"#9ca3af" }}>{label}</p>
-              <p className="text-4xl font-bold mt-2" style={{ color:cor }}>{valor}</p>
-            </div>
-          ))}
+            { label:"Total de Projetos",  valor:stats.total,       cor:VERDE,       key:"todos" as const },
+            { label:"Concluídos",         valor:stats.concluidos,  cor:"#10b981",   key:"concluidos" as const },
+            { label:"Em Andamento",       valor:stats.emAndamento, cor:"#3b82f6",   key:"emAndamento" as const },
+            { label:"Atrasados",          valor:stats.atrasados,   cor:"#ef4444",   key:"atrasados" as const },
+          ].map(({ label, valor, cor, key }) => {
+            const ativo = filtroStatus === key;
+            return (
+              <div
+                key={label}
+                onClick={() => setFiltroStatus(ativo ? "todos" : key)}
+                className="p-6 rounded-xl cursor-pointer transition-all"
+                style={{
+                  backgroundColor: ativo ? cor + "10" : "#ffffff",
+                  border: `2px solid ${ativo ? cor : "#e5e7eb"}`,
+                  boxShadow: ativo ? `0 0 0 3px ${cor}20` : "none",
+                }}
+              >
+                <p className="text-xs font-medium uppercase tracking-wide" style={{ color:"#9ca3af" }}>{label}</p>
+                <p className="text-4xl font-bold mt-2" style={{ color:cor }}>{valor}</p>
+              </div>
+            );
+          })}
         </div>
 
         {/* ── Tabela ── */}
