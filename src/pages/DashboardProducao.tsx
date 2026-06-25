@@ -18,7 +18,7 @@ const CORES_PALETTE = [
 ];
 
 const STATUS_CORES: Record<number, string> = {
-  1: "#f59e0b", 2: "#3b82f6", 3: "#8b5cf6", 4: "#ec4899", 5: "#10b981",
+  1: "#f59e0b", 2: "#3b82f6", 3: "#8b5cf6", 4: "#a16207", 5: "#10b981",
 };
 function corStatus(n: number) { return STATUS_CORES[n] ?? "#9ca3af"; }
 
