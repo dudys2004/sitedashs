@@ -166,21 +166,12 @@ export function DashboardProducao() {
     busca ? todosClientes.filter(c => c.toLowerCase().includes(busca.toLowerCase())) : todosClientes,
   [todosClientes, busca]);
 
-  // Dados para tabela (filtrados + ordenados)
+  // Dados para tabela (apenas filtro de cliente, sem filtro de status)
   const dadosTabela = useMemo(() => {
     if (!dados) return [];
-    let items = clienteSelecionado
+    const items = clienteSelecionado
       ? dados.clientes.filter(i => i.cliente === clienteSelecionado)
       : dados.clientes;
-
-    // Aplica filtro de status dos KPIs
-    if (filtroStatus === "concluidos") {
-      items = items.filter(isConcluido);
-    } else if (filtroStatus === "atrasados") {
-      items = items.filter(isAtrasado);
-    } else if (filtroStatus === "emAndamento") {
-      items = items.filter(i => !isConcluido(i));
-    }
 
     return [...items].sort((a, b) => {
       let va: string|number = "", vb: string|number = "";
@@ -193,9 +184,22 @@ export function DashboardProducao() {
       if (va > vb) return ordDir === "asc" ?  1 : -1;
       return 0;
     });
-  }, [dados, clienteSelecionado, ordCol, ordDir, filtroStatus]);
+  }, [dados, clienteSelecionado, ordCol, ordDir]);
 
-  // KPIs (respeitam filtro)
+  // Dados exibidos na tabela (com filtro de status)
+  const dadosTabelaExibidos = useMemo(() => {
+    let items = [...dadosTabela];
+    if (filtroStatus === "concluidos") {
+      items = items.filter(isConcluido);
+    } else if (filtroStatus === "atrasados") {
+      items = items.filter(isAtrasado);
+    } else if (filtroStatus === "emAndamento") {
+      items = items.filter(i => !isConcluido(i));
+    }
+    return items;
+  }, [dadosTabela, filtroStatus]);
+
+  // KPIs (sempre mostram o total sem filtro de status)
   const stats = useMemo(() => ({
     total:       dadosTabela.length,
     concluidos:  dadosTabela.filter(isConcluido).length,
@@ -511,14 +515,14 @@ export function DashboardProducao() {
                 </tr>
               </thead>
               <tbody>
-                {dadosTabela.length === 0 ? (
+                {dadosTabelaExibidos.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-10 text-center" style={{ color:"#9ca3af" }}>
                       Nenhum dado disponível
                     </td>
                   </tr>
                 ) : (
-                  dadosTabela.map((item, idx) => {
+                  dadosTabelaExibidos.map((item, idx) => {
                     const atrasado = isAtrasado(item);
                     const diff = item.previsaoEntrega ? diasDiff(item.previsaoEntrega) : null;
                     return (
